@@ -44,9 +44,18 @@ test('Ship placement 3.', () => {
   expect(gameboard.grid[6][8].ship).toBe(newShip);
 });
 
+// Test Receive Attack
 test('Receive Attack on empty grid.', () => {
   const gameboard = new Gameboard();
   const attackResult = gameboard.receiveAttack([0,0]);
   expect(attackResult).toBe(false);
   expect(gameboard.grid[0][0].attacked).toBe(true);
+});
+
+test('Receive Attack on ship grid.', () => {
+  const gameboard = new Gameboard();
+  const newShip = gameboard.placeShip([[7,4],[7,7]]);
+  const attackResult = gameboard.receiveAttack([7,5]);
+  expect(attackResult).toBe(true);
+  expect(gameboard.grid[7][5].attacked).toBe(true);
 });

@@ -27,8 +27,16 @@ to whatever is sending the hit. (the gameboard)
 
 class Ship {
   constructor(length) {
-    this.length = length;
     this.health = length;
+  }
+
+  hit() {
+    this.health--;
+    return this.#isSunk();
+  }
+
+  #isSunk() {
+    return this.health === 0;
   }
 }
 

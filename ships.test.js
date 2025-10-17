@@ -1,7 +1,10 @@
+import { Ship } from './ships.js';
 
-
-test('object assignment', () => {
-  const data = {one: 1};
-  data['two'] = 2;
-  expect(data).toEqual({one: 1, two: 2});
-});
+// Test Ship Creation
+for (let i = 2; i < 6; i ++) {
+  test(`Ship creation length ${i}.`, () => {
+    const ship = new Ship(i)
+    expect(ship.length).toBe(i);
+    expect(ship.health).toBe(i);
+  });
+}

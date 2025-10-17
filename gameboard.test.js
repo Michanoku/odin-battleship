@@ -48,7 +48,8 @@ test('Ship placement 3.', () => {
 test('Receive Attack on empty grid.', () => {
   const gameboard = new Gameboard();
   const attackResult = gameboard.receiveAttack([0,0]);
-  expect(attackResult).toBe(false);
+  expect(attackResult.hit).toBe(false);
+  expect(attackResult.allSunk).toBe(false);
   expect(gameboard.grid[0][0].attacked).toBe(true);
 });
 
@@ -56,6 +57,18 @@ test('Receive Attack on ship grid.', () => {
   const gameboard = new Gameboard();
   const newShip = gameboard.placeShip([[7,4],[7,7]]);
   const attackResult = gameboard.receiveAttack([7,5]);
-  expect(attackResult).toBe(true);
+  expect(attackResult.hit).toBe(true);
+  expect(attackResult.allSunk).toBe(false);
   expect(gameboard.grid[7][5].attacked).toBe(true);
+});
+
+test('Sink the last ship.', () => {
+  const gameboard = new Gameboard();
+  const newShip = gameboard.placeShip([[2,2],[5,2]]);
+  const attackResult1 = gameboard.receiveAttack([2,2]);
+  const attackResult2 = gameboard.receiveAttack([3,2]);
+  const attackResult3 = gameboard.receiveAttack([4,2]);
+  const attackResult4 = gameboard.receiveAttack([5,2]);
+  expect(attackResult4.hit).toBe(true);
+  expect(attackResult4.allSunk).toBe(true);
 });

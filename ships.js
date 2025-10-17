@@ -32,10 +32,9 @@ class Ship {
 
   hit() {
     this.health--;
-    return this.#isSunk();
   }
 
-  #isSunk() {
+  isSunk() {
     return this.health === 0;
   }
 }

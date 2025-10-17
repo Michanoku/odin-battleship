@@ -11,15 +11,17 @@ for (let i = 2; i < 6; i ++) {
 // Test Ship Hit
 test('Ship hit.', () => {
   const ship = new Ship(5);
-  const sunk = ship.hit();
+  ship.hit();
+  const sunk = ship.isSunk();
   expect(ship.health).toBe(4);
   expect(sunk).toBe(false);
 });
 
-test('Ship hit.', () => {
+test('Ship sunk.', () => {
   const ship = new Ship(2);
-  const sunk1 = ship.hit();
-  const sunk2 = ship.hit();
+  ship.hit();
+  ship.hit();
+  const sunk = ship.isSunk();
   expect(ship.health).toBe(0);
-  expect(sunk2).toBe(true);
+  expect(sunk).toBe(true);
 });

@@ -22,6 +22,8 @@ class Gameboard {
     this.grid = Array.from({length: 10}, () =>
       Array.from({length: 10}, () => ({attacked: false, ship: null}))
     );
+    this.ships = 0;
+    this.sunkShips = 0;
   }
 
   #getAllCoords(coordArray) {
@@ -65,11 +67,33 @@ class Gameboard {
       for (const coord of allCoords) {
         this.grid[coord[0]][coord[1]].ship = newShip;
       }
+      this.ships++;
       return newShip;
     }
     return null;
   }
 
+  receiveAttack(coord) {
+    // Get the targetcell of the attack and set attacked to true
+    const targetCell = this.grid[coord[0]][coord[1]];
+    targetCell.attacked = true;
+    // If there is a ship on the cell, hit it and see if its sunk
+    if (targetCell.ship) {
+      targetCell.ship.hit();
+      if(targetCell.ship.isSunk()) {
+        // If it is sunk, add it to sunk ships
+        this.sunkShips++;
+        // If all ships are sunk, return so
+        if (this.sunkShips === this.ships) {
+          return {hit: true, allSunk: true};
+        }
+      }
+      // Return the attack was a hit but not all ships are sunk
+      return {hit: true, allSunk: false};
+    }
+    // Returm the attack was not a hit and not all ships are sunk
+    return {hit: false, allSunk: false};
+  }
 }
 
 export { Gameboard }

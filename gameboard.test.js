@@ -26,3 +26,20 @@ test('Ship placement 2.', () => {
   expect(gameboard.grid[0][0].ship).toBe(newShip);
   expect(gameboard.grid[0][1].ship).toBe(newShip);
 });
+
+test('Ship placement 4.', () => {
+  const gameboard = new Gameboard();
+  const newShip = gameboard.placeShip([[2,0],[5,0]]);
+  expect(gameboard.grid[2][0].ship).toBe(newShip);
+  expect(gameboard.grid[3][0].ship).toBe(newShip);
+  expect(gameboard.grid[4][0].ship).toBe(newShip);
+  expect(gameboard.grid[5][0].ship).toBe(newShip);
+});
+
+test('Ship placement 3.', () => {
+  const gameboard = new Gameboard();
+  const newShip = gameboard.placeShip([[6,6],[6,8]]);
+  expect(gameboard.grid[6][6].ship).toBe(newShip);
+  expect(gameboard.grid[6][7].ship).toBe(newShip);
+  expect(gameboard.grid[6][8].ship).toBe(newShip);
+});

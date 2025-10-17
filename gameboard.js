@@ -24,15 +24,45 @@ class Gameboard {
     );
   }
 
+  #getAllCoords(coordArray) {
+    // Create an array to house all coordinates
+    const allCoords = new Array();
+
+    // Get the start of the ships coordinates and the end
+    const start = coordArray[0];
+    const end = coordArray[1];
+
+    // Add the first coordinate
+    allCoords.push(start);
+    // If the x coordinates are the same
+    if (start[0] === end[0]) {
+      let i = start[1] + 1;
+      while (i < end[1]) {
+        allCoords.push([start[0], i]);
+        i++;
+      }
+    } else {
+      let i = start[0] + 1;
+      while (i < end[0]) {
+        allCoords.push([i, start[1]]);
+        i++;
+      }
+    }
+    allCoords.push(end);
+    return allCoords;
+  }
+
   placeShip(coordArray) {
+    // Get all coordinates between the ones passed
+    const allCoords = this.#getAllCoords(coordArray)
     // Check if the coordinates are empty (no ships are present)
     const isEmpty = (coord) => {
       return this.grid[coord[0]][coord[1]].ship === null;
     }
-    if (coordArray.every(isEmpty)) {
+    if (allCoords.every(isEmpty)) {
       // Create the ship based on the length of the coord array
-      const newShip = new Ship(coordArray.length);
-      for (const coord of coordArray) {
+      const newShip = new Ship(allCoords.length);
+      for (const coord of allCoords) {
         this.grid[coord[0]][coord[1]].ship = newShip;
       }
       return newShip;

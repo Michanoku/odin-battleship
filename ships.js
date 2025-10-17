@@ -12,6 +12,7 @@ Methods or Variables:
 length (the ships length) 
 HP (same as length at first, going towards 0 if hit) 
 Description says number of hits, but going backwards from HP seems simpler
+In this thought, its a question if we need length at all....
 isSunk (should be a method checking if HP is 0)
 
 hit() function (decreases HP)
@@ -23,3 +24,12 @@ hit() - receives the info that the ship was hit and should reduce hp by 1
 isSunk() - should probably be checked after every hit and returns the info 
 to whatever is sending the hit. (the gameboard) 
 */
+
+class Ship {
+  constructor(length) {
+    this.length = length;
+    this.health = length;
+  }
+}
+
+export { Ship }

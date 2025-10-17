@@ -14,3 +14,13 @@ keep track of number of ships on the board and whether or not they have been sun
 In the interface, we only need 2 gameboards, but they need to show different information to the player.
 (which we can maybe leave to the dom, we'll see)
 */
+
+class Gameboard {
+  constructor() {
+    this.grid = Array.from({length: 10}, () =>
+      Array.from({length: 10}, () => ({status: null, ship: null}))
+    );
+  }
+}
+
+export { Gameboard }

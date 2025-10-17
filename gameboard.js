@@ -1,3 +1,5 @@
+import { Ship } from './ships.js';
+
 /* Consideration for the gameboard logic
 
 Grid is 10x10 -> Use Array of arrays
@@ -21,6 +23,23 @@ class Gameboard {
       Array.from({length: 10}, () => ({status: null, ship: null}))
     );
   }
+
+  placeShip(coordArray) {
+    // Check if the coordinates are empty (no ships are present)
+    const isEmpty = (coord) => {
+      return this.grid[coord[0]][coord[1]].ship === null;
+    }
+    if (coordArray.every(isEmpty)) {
+      // Create the ship based on the length of the coord array
+      const newShip = new Ship(coordArray.length);
+      for (const coord of coordArray) {
+        this.grid[coord[0]][coord[1]].ship = newShip;
+      }
+      return newShip;
+    }
+    return null;
+  }
+
 }
 
 export { Gameboard }

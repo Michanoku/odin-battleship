@@ -9,6 +9,16 @@ test('Gameboard creation.', () => {
   }
 });
 
+// Test gameboard grid cells
+test('Gameboard grid cells.', () => {
+  const gameboard = new Gameboard();
+  for (const row of gameboard.grid) {
+    for (const cell of row) {
+      expect(cell).toEqual({status: null, ship: null});
+    }
+  }
+});
+
 // Test ship placement
 test('Ship placement 2.', () => {
   const gameboard = new Gameboard();

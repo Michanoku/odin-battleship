@@ -19,9 +19,11 @@ In the interface, we only need 2 gameboards, but they need to show different inf
 
 class Gameboard {
   constructor() {
+    // Create a 10x10 grid to play the game in
     this.grid = Array.from({length: 10}, () =>
       Array.from({length: 10}, () => ({attacked: false, ship: null}))
     );
+    // The gameboard initially has 0 ships / sunk ships
     this.ships = 0;
     this.sunkShips = 0;
   }

@@ -20,7 +20,7 @@ In the interface, we only need 2 gameboards, but they need to show different inf
 class Gameboard {
   constructor() {
     this.grid = Array.from({length: 10}, () =>
-      Array.from({length: 10}, () => ({status: null, ship: null}))
+      Array.from({length: 10}, () => ({attacked: false, ship: null}))
     );
   }
 

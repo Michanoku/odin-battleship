@@ -14,7 +14,7 @@ test('Gameboard grid cells.', () => {
   const gameboard = new Gameboard();
   for (const row of gameboard.grid) {
     for (const cell of row) {
-      expect(cell).toEqual({status: null, ship: null});
+      expect(cell).toEqual({attacked: false, ship: null});
     }
   }
 });
@@ -42,4 +42,11 @@ test('Ship placement 3.', () => {
   expect(gameboard.grid[6][6].ship).toBe(newShip);
   expect(gameboard.grid[6][7].ship).toBe(newShip);
   expect(gameboard.grid[6][8].ship).toBe(newShip);
+});
+
+test('Receive Attack on empty grid.', () => {
+  const gameboard = new Gameboard();
+  const attackResult = gameboard.receiveAttack([0,0]);
+  expect(attackResult).toBe(false);
+  expect(gameboard.grid[0][0].attacked).toBe(true);
 });

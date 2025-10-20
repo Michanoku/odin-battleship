@@ -1,6 +1,13 @@
+@font-face {
+    font-family: 'silkscreen';
+    src: url('./font/silkscreen.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
 :root {
   font-size: 16px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'silkscreen', Arial, Helvetica, sans-serif;
   --space: #131924;
   --accent: #13E621;
   --muted: #1B4736;
@@ -13,7 +20,7 @@
   margin: 0;
 }
 
-input {
+input, button {
   border: none;
   outline: none;
   background: transparent;
@@ -37,6 +44,19 @@ nav {
   grid-area: nav;
   background-color: var(--light);
   color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 1.25rem;
+}
+
+#new-game {
+  color: var(--muted);
+  border: 3px solid var(--muted);
+  padding: 3px;
+  cursor: pointer;
 }
 
 #info, #action {

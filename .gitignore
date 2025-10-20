@@ -1,8 +1,6 @@
 # Project specific
 babel.config.js
 eslint.config.mjs
-package-lock.json
-package.json
 # Logs
 logs
 *.log

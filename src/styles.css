@@ -19,3 +19,45 @@ input {
   background: transparent;
   font: inherit;
 }
+
+html {
+  background-color: var(--space);
+  color: var(--accent);
+}
+
+body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 2.5rem 5rem 1fr;
+  grid-template-areas: 'nav nav' 'info action' 'player1 player2';
+  height: 100vh;
+}
+
+nav {
+  grid-area: nav;
+  background-color: var(--light);
+  color: var(--muted);
+}
+
+#info, #action {
+  background-color: var(--muted);
+  color: var(--light);
+}
+
+#info {
+  grid-area: info;
+}
+
+#action {
+  grid-area: action;
+}
+
+#player1 {
+ grid-area: player1; 
+ border-right: 1px solid var(--accent);
+}
+
+#player2 {
+  grid-area: player2;
+  border-left: 1px solid var(--accent);
+}

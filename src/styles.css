@@ -96,3 +96,22 @@ nav {
   grid-area: player2;
   border-left: 1px solid var(--accent);
 }
+
+.gameboard {
+  margin: 4rem;
+  display: grid;
+  grid-template-rows: repeat(11, 1fr);
+  grid-template-columns: repeat(11, 1fr);
+  aspect-ratio: 1/1;
+}
+
+.cell-outer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.125 rem;
+}
+
+.cell-inner {
+  border: 1px solid var(--accent);
+}

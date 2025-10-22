@@ -20,11 +20,11 @@ function createGameboard(player) {
       if (i === 0) {
         cell.classList.add('cell-outer');
         if (j !== 0) {
-          cell.textContent = i;
+          cell.textContent = j;
         }
       } else if (j === 0) {
         cell.classList.add('cell-outer');
-        cell.textContent = coordMap[j];
+        cell.textContent = coordMap[i];
       } else {
         cell.classList.add('cell-inner');
       }

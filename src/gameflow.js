@@ -16,4 +16,5 @@ const game = (function(){
   return { addPlayer }
 })();
 
-createGameboard();
+createGameboard(1);
+createGameboard(2);

@@ -98,7 +98,8 @@ nav {
 }
 
 .gameboard {
-  margin: 4rem;
+  margin-left: 6rem;
+  margin-right: 6rem;
   display: grid;
   grid-template-rows: repeat(11, 1fr);
   grid-template-columns: repeat(11, 1fr);

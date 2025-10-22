@@ -1,5 +1,6 @@
 import "./styles.css";
 import { Player } from './players.js';
+import { createGameboard } from './interface.js';
 
 
 const game = (function(){
@@ -14,3 +15,5 @@ const game = (function(){
   }
   return { addPlayer }
 })();
+
+createGameboard();

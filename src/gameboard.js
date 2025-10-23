@@ -20,8 +20,8 @@ In the interface, we only need 2 gameboards, but they need to show different inf
 class Gameboard {
   constructor() {
     // Create a 10x10 grid to play the game in
-    this.grid = Array.from({length: 10}, () =>
-      Array.from({length: 10}, () => ({attacked: false, ship: null}))
+    this.grid = Array.from({ length: 10 }, (_, i) =>
+      Array.from({ length: 10 }, (_, j) => new Cell([i, j]))
     );
     // The gameboard initially has 0 ships / sunk ships
     this.ships = 0;
@@ -95,6 +95,46 @@ class Gameboard {
     }
     // Returm the attack was not a hit and not all ships are sunk
     return {hit: false, allSunk: false};
+  }
+
+  randomize() {
+    
+    // Get the first X coordinate:
+    // If 10 - the x coordinate is smaller than the ship, we can only
+    // place vertical.
+    /*1 	Carrier 	5
+    2 	Battleship 	4
+    3 	Destroyer 	3
+    4 	Submarine 	3
+    5 	Patrol Boat 	2 
+    */
+  }
+}
+
+class Cell {
+  constructor(coords) {
+    this.coords = coords,
+    this.attacked = false,
+    this.ship = null,
+    this.horizontal = this.initialize("horizontal");
+    this.vertical = this.initialize("vertical");
+  }
+
+  initialize(direction) {
+    const neighborArray = new Array();
+    const [row, col] = this.coords;
+    const fixed = direction === 'horizontal' ? row : col;
+    const moving = direction === 'horizontal' ? col : row; 
+
+    for (let i = 1; i < 5; i++) {
+      const newCoord = moving + i;
+      if (newCoord > 9) {
+        break;
+      }
+      const newCoords = direction === 'horizontal' ? [fixed, newCoord] : [newCoord, fixed];
+      neighborArray.push(newCoords);
+    }
+    return neighborArray;
   }
 }
 

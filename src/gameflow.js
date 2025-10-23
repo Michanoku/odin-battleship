@@ -1,6 +1,6 @@
 import "./styles.css";
 import { Player } from './players.js';
-import { createGameboard } from './interface.js';
+import { createGameboard, createStars } from './interface.js';
 
 
 const game = (function(){
@@ -16,5 +16,12 @@ const game = (function(){
   return { addPlayer }
 })();
 
-createGameboard(1);
+const player = new Player("Michanoku");
+console.log(player.gameboard)
+player.gameboard.randomize();
+console.log(player.gameboard)
+createGameboard(1, player.gameboard.grid);
 createGameboard(2);
+createStars(1);
+createStars(2);
+

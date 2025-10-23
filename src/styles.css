@@ -12,6 +12,9 @@
   --accent: #13E621;
   --muted: #1B4736;
   --light: #D0EBD1;
+  --ship: #909590;
+  --ship-border: #474A48;
+  --ship-attacked: #FF1D15;
 }
 
 * {
@@ -90,11 +93,50 @@ nav {
 #player1 {
  grid-area: player1; 
  border-right: 1px solid var(--accent);
+ position: relative;
 }
 
 #player2 {
   grid-area: player2;
   border-left: 1px solid var(--accent);
+  position: relative;
+}
+
+.small {
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  z-index: 0;
+}
+
+.medium { 
+  width: 3px;
+  height: 3px;
+  position: absolute;
+  z-index: 0;
+}
+
+.big {
+  width: 4px;
+  height: 4px;
+  position: absolute;
+  z-index: 0;
+}
+
+.red {
+  background-color: red;
+}
+
+.blue {
+  background-color: lightblue;
+}
+
+.white {
+  background-color: white;
+}
+
+.yellow {
+  background-color: yellow;
 }
 
 .gameboard {
@@ -111,8 +153,34 @@ nav {
   justify-content: center;
   align-items: center;
   font-size: 1.125 rem;
+  z-index: 20;
 }
 
 .cell-inner {
   border: 1px solid var(--accent);
+  z-index: 20;
+}
+
+.cell-ship {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--ship);
+  box-shadow: inset -2px 0 0 var(--ship-border), inset 0 -2px 0 var(--ship-border), inset 2px 0 0 var(--ship-border), inset 0 2px 0 var(--ship-border);
+}
+
+.cell-attacked.cell-ship::after {
+  content: "X";
+  color: var(--ship-attacked);
+  font-size: 1.625rem;
+}
+
+.cell-attacked:not(.cell-ship) {
+    background: repeating-linear-gradient(
+    -45deg,
+    var(--muted),
+    var(--muted) 2px,
+    transparent 2px,
+    transparent 10px
+  );
 }

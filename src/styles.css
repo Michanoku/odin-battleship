@@ -100,6 +100,58 @@ nav {
   grid-area: player2;
   border-left: 1px solid var(--accent);
   position: relative;
+  display: none;
+}
+
+#setup {
+  grid-area: player2;
+  border-left: 1px solid var(--accent);
+  display: grid;
+  grid-template-rows: 3rem 1fr 3rem;
+  grid-template-areas: 'name' 'ship-selection' 'ship-name';
+}
+
+#name {
+  margin-left: 8rem;
+  margin-right: 8rem;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 1rem;
+}
+
+#enter-name {
+  background-color: transparent;
+  border-bottom: 2px solid var(--accent);
+  caret-color: var(--accent);
+  color: var(--accent);
+}
+
+#ship-selection {
+  grid-area: ship-selection;
+  margin-left: 8rem;
+  margin-right: 8rem;
+  display: grid;
+  grid-template-rows: repeat(9, 1fr);
+  grid-template-columns: repeat(10, 1fr);
+  aspect-ratio: 1/1;
+}
+
+#ship-name {
+  grid-area: ship-name;
+  color: var(--accent);
+  display: flex;
+  justify-content: center;
+  align-items: start;
+}
+
+.ship {
+  background-color: var(--ship);
+  box-shadow: inset -2px 0 0 var(--ship-border), inset 0 -2px 0 var(--ship-border), inset 2px 0 0 var(--ship-border), inset 0 2px 0 var(--ship-border);
+  cursor: pointer;
+}
+.ship[data-selected="true"] {
+  background-color: var(--ship-border);
 }
 
 .small {

@@ -17,8 +17,8 @@ const game = (function(){
 })();
 
 const player = new Player("Michanoku");
-console.log(player.gameboard)
-player.gameboard.randomize();
+console.log(JSON.stringify(player.gameboard, null, 2));
+player.gameboard.randomizeBoard();
 console.log(player.gameboard)
 createGameboard(1, player.gameboard.grid);
 createGameboard(2);

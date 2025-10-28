@@ -203,7 +203,7 @@ const gameSetup = (function () {
     currentPlayer.textContent = 'Player 1';
     confirmButton.disabled = true;
     shipName.textContent = '';
-    
+
     // Reset all objects 
     while (player1.firstChild) {
       player1.removeChild(player1.firstChild);
@@ -502,46 +502,97 @@ const gameSetup = (function () {
   return { initializeGame, resetBoard, setupPlayer2, randomizeShips };
 })();
 
-function createGameboard(player, gameboard=null) {
-  const playerField = document.querySelector(`#player${player}`);
-  const gameboardDiv = document.createElement('div');
-  const coordMap = {
-    1: 'A',
-    2: 'B',
-    3: 'C',
-    4: 'D',
-    5: 'E',
-    6: 'F',
-    7: 'G',
-    8: 'H',
-    9: 'I',
-    10: 'J',
+const gameTurn = (function() {
+
+  const fireButton = document.querySelector('#fire-button');
+  const endButton = document.querySelector('#end-button');
+  const startButton = document.querySelector('#start-button');
+  const player1 = document.querySelector(`#player1`);
+  const player2 = document.querySelector(`#player2`); 
+  const setup = document.querySelector('#setup');
+  const currentPlayer = document.querySelector('#current-player');
+
+  // Set up the first turn
+  function firstTurn() {
+    setup.style.display = 'none';
+    player1.style.display = 'none';
+    player2.style.display = 'none';
+    currentPlayer.textContent = 'Player 1';
+    startButton.style.display = 'block';
   }
-  gameboardDiv.classList.add('gameboard');
-  for (let i = 0; i < 11; i++) {
-    for (let j = 0; j < 11; j++) {
-      const cell = document.createElement('div');
-      if (i === 0) {
-        cell.classList.add('cell-outer');
-        if (j !== 0) {
-          cell.textContent = j;
-        }
-      } else if (j === 0) {
-        cell.classList.add('cell-outer');
-        cell.textContent = coordMap[i];
-      } else {
-        cell.classList.add('cell-inner');
-        if (gameboard && gameboard[i-1][j-1].ship) {
-          cell.classList.add('cell-ship');
-        }
-        if (gameboard && gameboard[i-1][j-1].attacked) {
-          cell.classList.add('cell-attacked');
-        }
-      }
-      gameboardDiv.appendChild(cell);
+
+  function resetMaps() {
+    while (player1.firstChild) {
+      player1.removeChild(player1.firstChild);
+    }
+    while (player2.firstChild) {
+      player2.removeChild(player2.firstChild);
     }
   }
-  playerField.appendChild(gameboardDiv);
-}
 
-export { gameSetup, createGameboard }
+  function addListeners() {
+    fireButton.addEventListener('click', () => {
+      // Carry out attack and get results back
+      // send an attack event to the gameflow, which carries out the attack
+      // gameflow sill call anohter function
+    });
+    startButton.addEventListener('click', () => {
+      // Show your current map and attack map 
+      startTurn();
+    });
+    endButton.addEventListener('click', () => {
+      // Hide maps 
+    });
+  }
+
+  function requestStart() {
+    document.dispatchEvent(new CustomEvent('requestStart'));
+  }
+
+  function createGameboard(player, gameboard=null) {
+    const playerField = document.querySelector(`#player${player}`);
+    const gameboardDiv = document.createElement('div');
+    const coordMap = {
+      1: 'A',
+      2: 'B',
+      3: 'C',
+      4: 'D',
+      5: 'E',
+      6: 'F',
+      7: 'G',
+      8: 'H',
+      9: 'I',
+      10: 'J',
+    }
+    gameboardDiv.classList.add('gameboard');
+    for (let i = 0; i < 11; i++) {
+      for (let j = 0; j < 11; j++) {
+        const cell = document.createElement('div');
+        if (i === 0) {
+          cell.classList.add('cell-outer');
+          if (j !== 0) {
+            cell.textContent = j;
+          }
+        } else if (j === 0) {
+          cell.classList.add('cell-outer');
+          cell.textContent = coordMap[i];
+        } else {
+          cell.classList.add('cell-inner');
+          if (gameboard && gameboard[i-1][j-1].ship) {
+            cell.classList.add('cell-ship');
+          }
+          if (gameboard && gameboard[i-1][j-1].attacked) {
+            cell.classList.add('cell-attacked');
+          }
+        }
+        gameboardDiv.appendChild(cell);
+      }
+    }
+    playerField.appendChild(gameboardDiv);
+  }
+  return { firstTurn }
+})();
+
+
+
+export { gameSetup, gameTurn }

@@ -2,12 +2,13 @@ import "./styles.css";
 
 import { Player } from './players.js';
 import { gameboardManager } from './gameboard.js';
-import { gameSetup } from './interface.js';
+import { gameSetup, gameTurn } from './interface.js';
 
 
 const game = (function(){
   const state = {
     players: new Array(),
+    turn: 0,
   };
 
   function addPlayer(data) {
@@ -24,6 +25,22 @@ const game = (function(){
     waitForRandomPlacement();
     // Initialize the game
     gameSetup.initializeGame();
+  }
+
+  function takeTurns() {
+    // Give take turns to the player
+    waitForStart();
+    waitForAttack();
+    waitForEnd();
+    gameTurn.firstTurn();
+    // change turn to the next player
+  }
+
+  function waitforStart() {
+    document.addEventListener('requestStart', () => {
+      // Get random ship placements from the gameboard
+      gameTurn.startTurn(state)
+    });
   }
 
   // If the player wants to randomize the placement board
@@ -47,7 +64,7 @@ const game = (function(){
     document.addEventListener('playerReady', (event) => {
       addPlayer(event.detail);
       if (state.players.length === 2) {
-        // Next Phase
+        takeTurns();
       } else {
         gameSetup.resetBoard();
         gameSetup.setupPlayer2();

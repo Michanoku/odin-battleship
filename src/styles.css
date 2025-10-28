@@ -99,7 +99,7 @@ nav {
   font-size: 1.625rem;
 }
 
-#human-button, #cpu-button, #fire-button {
+#human-button, #cpu-button, #fire-button, #end-button, #start-button {
   display: none;
 }
 

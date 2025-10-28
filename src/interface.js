@@ -14,10 +14,13 @@ const gameSetup = (function () {
     'Leviathan': {},
   }
 
+  const enterName = document.querySelector('#enter-name');
+  const confirmButton = document.querySelector('#confirm-button');
+
   function initializeGame() {
     createSetupBoard();
     createShipSelection();
-    addButtonListeners();
+    addListeners();
   }
 
   function createSetupBoard() {
@@ -158,16 +161,31 @@ const gameSetup = (function () {
         shipSelection.appendChild(cell);
       }
     }
-    createOptions();
+    enterName.focus();
   }
 
-  function addButtonListeners() {
+  function addListeners() {
+    enterName.addEventListener('input', () => {
+      validateUserSetup();
+    });
     const resetButton = document.querySelector('#reset-button');
     resetButton.addEventListener('click', () => {
       resetBoard();
     });
-    // Action Button
+    // Confirm Button
+    confirmButton.addEventListener('click', () => {
+      confirmPlayer();
+    });
     // New Game Button
+  }
+
+  // Check if the user is finished setting up
+  function validateUserSetup() {
+    const nameValid = enterName.value.trim().length > 0;
+    const shipsValid = Object.values(shipPlacement)
+      .every(ship => ship && Object.keys(ship).length > 0);
+
+    confirmButton.disabled = !(nameValid && shipsValid);
   }
 
   // Create a ghost image for the draggable content to replace the default
@@ -265,6 +283,8 @@ const gameSetup = (function () {
       size: dragData.size,
       direction: dragData.direction,
     };
+    // Check if the user is done and if so activate confirm button
+    validateUserSetup();
   }
 
   // What happens when a ship is selected
@@ -301,13 +321,6 @@ const gameSetup = (function () {
     });
   }
 
-  // Create the options menu 
-  function createOptions() {
-    const enterName = document.querySelector('#enter-name');
-    enterName.clear();
-    enterName.focus();
-  }
-
   // Reset the placement board
   function resetBoard() {
     // Reset placed ship data
@@ -330,19 +343,22 @@ const gameSetup = (function () {
       }
     });
     // State and erase the players placed ship data and name
-    createOptions();
+    enterName.clear();
+    enterName.focus();
+    confirmButton.disabled = true;
   }
 
   function random() {
     // Set ships at random
   }
 
-  function confirm() {
+  function confirmPlayer() {
     // create the player with the name and placed ships. 
-    // Maybe create function that will create all ships in turn. 
+    const playerData = {name: enterName.value, cpu: false, ships: shipPlacement};
+    document.dispatchEvent(new CustomEvent('playerReady', { detail: playerData })); 
   }
 
-  return { initializeGame };
+  return { initializeGame, resetBoard };
 })();
 
 function createGameboard(player, gameboard=null) {

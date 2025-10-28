@@ -8,8 +8,6 @@ const game = (function(){
     players: new Array(),
   };
 
-  
-
   function addPlayer(data) {
     const name = data.name;
     const cpu = data.cup;
@@ -17,22 +15,29 @@ const game = (function(){
     state.players.push(new Player(name, cpu, ships));
   }
 
+  function start() {
+    gameSetup.initializeGame();
+    waitForPlayers();
+    // Need to be replaced later
+    createStars(1);
+    createStars(2);
+  }
+
   function waitForPlayers() {
     document.addEventListener('playerReady', (event) => {
-      state.players.push(event.detail);
+      addPlayer(event.detail);
       if (state.players.length === 2) {
-        console.log('Both players ready! Starting game...');
-        // startGame(players);
+        // Next Phase
+      } else {
+        gameSetup.resetBoard();
       }
     });
   }
-  return { addPlayer }
+  return { start }
 })();
 
 //const player = new Player("Michanoku");
 //player.gameboard.randomizeBoard();
 //createGameboard(1, player.gameboard.grid);
-gameSetup.initializeGame();
-createStars(1);
-createStars(2);
+game.start();
 

@@ -83,7 +83,7 @@ nav {
   align-items: center;
 }
 
-#reset-button {
+.game-button {
   color: var(--light);
   border: 0.25rem solid var(--light);
   padding: 0.5rem;
@@ -91,15 +91,7 @@ nav {
   font-size: 1.625rem;
 }
 
-#action-button {
-  color: var(--light);
-  border: 0.25rem solid var(--light);
-  padding: 0.5rem;
-  cursor: pointer;
-  font-size: 1.625rem;
-}
-
-#action-disabled {
+.game-button:disabled {
   color: var(--ship-border);
   border: 0.25rem solid var(--ship-border);
   padding: 0.5rem;

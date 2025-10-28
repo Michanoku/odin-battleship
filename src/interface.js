@@ -14,6 +14,12 @@ const gameSetup = (function () {
     'Leviathan': {},
   }
 
+  function initializeGame() {
+    createSetupBoard();
+    createShipSelection();
+    addButtonListeners();
+  }
+
   function createSetupBoard() {
     const playerField = document.querySelector(`#player1`);
     const gameboardDiv = document.createElement('div');
@@ -155,6 +161,15 @@ const gameSetup = (function () {
     createOptions();
   }
 
+  function addButtonListeners() {
+    const resetButton = document.querySelector('#reset-button');
+    resetButton.addEventListener('click', () => {
+      resetBoard();
+    });
+    // Action Button
+    // New Game Button
+  }
+
   // Create a ghost image for the draggable content to replace the default
   function createGhost(cell, size, direction) {
     // Create a ghost grid to imitate the grid the cell is currently on
@@ -289,10 +304,45 @@ const gameSetup = (function () {
   // Create the options menu 
   function createOptions() {
     const enterName = document.querySelector('#enter-name');
+    enterName.clear();
     enterName.focus();
   }
 
-  return { createSetupBoard, createShipSelection};
+  // Reset the placement board
+  function resetBoard() {
+    // Reset placed ship data
+    for (const ship in shipPlacement) {
+      shipPlacement[ship] = {};
+    }
+    // Reset ship placement
+    const placedShips = document.querySelectorAll('.cell-ship');
+    placedShips.forEach(ship => {
+      ship.classList.remove('cell-ship');
+    });
+    // Reset ship selection
+    const shipSelection = document.querySelectorAll('[data-current]');
+    shipSelection.forEach(cell => {
+      cell.dataset.current = 'vertical';
+      if (cell.dataset.vertical === 'true') {
+        cell.classList.add('ship');
+      } else {
+        cell.classList.remove('ship');
+      }
+    });
+    // State and erase the players placed ship data and name
+    createOptions();
+  }
+
+  function random() {
+    // Set ships at random
+  }
+
+  function confirm() {
+    // create the player with the name and placed ships. 
+    // Maybe create function that will create all ships in turn. 
+  }
+
+  return { initializeGame };
 })();
 
 function createGameboard(player, gameboard=null) {

@@ -18,7 +18,7 @@ In the interface, we only need 2 gameboards, but they need to show different inf
 */
 
 class Gameboard {
-  constructor() {
+  constructor(ships = null) {
     // Create a 10x10 grid to play the game in
     this.grid = Array.from({ length: 10 }, (_, i) =>
       Array.from({ length: 10 }, (_, j) => new Cell([i, j]))
@@ -26,6 +26,20 @@ class Gameboard {
     // The gameboard initially has 0 ships / sunk ships
     this.ships = 0;
     this.sunkShips = 0;
+
+    // If we passed ships to the board, place them immediately
+    if (ships) {
+      // If we just passed random, place random ships
+      if (ships === 'random') {
+        this.randomizeBoard();
+      } else {
+        // Place each ship in it's location
+        for (const ship in ships) {
+          const {coord, size, direction} = ships[ship]; 
+          this.placeShip(coord, size, direction);
+        }
+      }
+    }
   }
 
   #getAllCoords(coord, size, direction) {

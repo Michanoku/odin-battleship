@@ -99,6 +99,10 @@ nav {
   font-size: 1.625rem;
 }
 
+#human-button, #cpu-button, #fire-button {
+  display: none;
+}
+
 #player1 {
  grid-area: player1; 
  border-right: 1px solid var(--accent);

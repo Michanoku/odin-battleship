@@ -1,6 +1,8 @@
 import "./styles.css";
+
 import { Player } from './players.js';
-import { createGameboard, createStars, gameSetup } from './interface.js';
+import { gameboardManager } from './gameboard.js';
+import { gameSetup } from './interface.js';
 
 
 const game = (function(){
@@ -10,17 +12,35 @@ const game = (function(){
 
   function addPlayer(data) {
     const name = data.name;
-    const cpu = data.cup;
+    const cpu = data.cpu;
     const ships = data.ships
     state.players.push(new Player(name, cpu, ships));
   }
 
   function start() {
-    gameSetup.initializeGame();
+    // Events that fire from the interface
     waitForPlayers();
-    // Need to be replaced later
-    createStars(1);
-    createStars(2);
+    waitForReset();
+    waitForRandomPlacement();
+    // Initialize the game
+    gameSetup.initializeGame();
+  }
+
+  // If the player wants to randomize the placement board
+  function waitForRandomPlacement() {
+    document.addEventListener('randomPlacement', () => {
+      // Get random ship placements from the gameboard
+      const shipPlacement = gameboardManager.randomPlacement();
+      gameSetup.randomizeShips(shipPlacement);
+    });
+  }
+
+  function waitForReset() {
+    document.addEventListener('initialize', () => {
+      // Reset all states
+      state.players = new Array();
+      gameSetup.initializeGame();
+    });
   }
 
   function waitForPlayers() {
@@ -30,6 +50,7 @@ const game = (function(){
         // Next Phase
       } else {
         gameSetup.resetBoard();
+        gameSetup.setupPlayer2();
       }
     });
   }

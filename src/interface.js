@@ -16,15 +16,40 @@ const gameSetup = (function () {
 
   const enterName = document.querySelector('#enter-name');
   const confirmButton = document.querySelector('#confirm-button');
+  const randomButton = document.querySelector('#random-button');
+  const cpuButton = document.querySelector('#cpu-button');
+  const humanButton = document.querySelector('#human-button');
+  const resetButton = document.querySelector('#reset-button');
+  const fireButton = document.querySelector('#fire-button');
+  const newGameButton = document.querySelector('#new-game');
+
+  const player1 = document.querySelector(`#player1`);
+  const player2 = document.querySelector(`#player2`); 
+  const setup = document.querySelector('#setup');
+  const shipSelection = document.querySelector('#ship-selection');
+
+  const shipName = document.querySelector('#ship-name');
+  const currentPlayer = document.querySelector('#current-player');
 
   function initializeGame() {
+    createStars(1);
+    createStars(2);
     createSetupBoard();
     createShipSelection();
     addListeners();
   }
 
+  function setupPlayer2() {
+    currentPlayer.textContent = 'Player 2';
+    setup.style.display = 'none';
+    confirmButton.style.display = 'none';
+    resetButton.style.display = 'none';
+    randomButton.style.display = 'none';
+    cpuButton.style.display = 'block';
+    humanButton.style.display = 'block';
+  }
+
   function createSetupBoard() {
-    const playerField = document.querySelector(`#player1`);
     const gameboardDiv = document.createElement('div');
     const coordMap = {
       1: 'A',
@@ -66,11 +91,10 @@ const gameSetup = (function () {
         gameboardDiv.appendChild(cell);
       }
     }
-    playerField.appendChild(gameboardDiv);
+    player1.appendChild(gameboardDiv);
   }
 
   function createShipSelection() {
-    const shipSelection = document.querySelector('#ship-selection');
     // Define coordinate groups for each class of direction and ship type
     const directionMap = {
       core: [
@@ -165,18 +189,44 @@ const gameSetup = (function () {
   }
 
   function addListeners() {
-    enterName.addEventListener('input', () => {
-      validateUserSetup();
-    });
-    const resetButton = document.querySelector('#reset-button');
-    resetButton.addEventListener('click', () => {
-      resetBoard();
-    });
-    // Confirm Button
-    confirmButton.addEventListener('click', () => {
-      confirmPlayer();
-    });
-    // New Game Button
+    enterName.addEventListener('input', validateUserSetup);
+    resetButton.addEventListener('click', resetBoard);
+    confirmButton.addEventListener('click', confirmPlayer);
+    randomButton.addEventListener('click', callRandomizer);
+    newGameButton.addEventListener('click', newGame);
+    humanButton.addEventListener('click', humanPlayer2);
+    cpuButton.addEventListener('click', confirmCpuPlayer);
+  }
+
+  function newGame() {
+    // All DOM objects need to be rest to initial state
+    currentPlayer.textContent = 'Player 1';
+    confirmButton.disabled = true;
+    shipName.textContent = '';
+    
+    // Reset all objects 
+    while (player1.firstChild) {
+      player1.removeChild(player1.firstChild);
+    }
+    while (player2.firstChild) {
+      player2.removeChild(player2.firstChild);
+    }
+    while (shipSelection.firstChild) {
+      shipSelection.removeChild(shipSelection.firstChild);
+    }
+    // Hide objects to hide
+    player2.style.display = 'none';
+    cpuButton.style.display = 'none';
+    // Show objects to show
+    setup.style.display = 'grid';
+    resetButton.style.display = 'block';
+    confirmButton.style.display = 'block';
+    randomButton.style.display = 'block';
+    cpuButton.style.display = 'none';
+    humanButton.style.display = 'none';
+    fireButton.style.display = 'none';
+    // Dispatch event to reset
+    document.dispatchEvent(new CustomEvent('initialize'));
   }
 
   // Check if the user is finished setting up
@@ -279,7 +329,7 @@ const gameSetup = (function () {
     });
     // Save the data in the placement object
     shipPlacement[dragData.ship] = {
-      coord: [cell.dataset.horizontal, cell.dataset.vertical],
+      coord: [parseInt(cell.dataset.horizontal), parseInt(cell.dataset.vertical)],
       size: dragData.size,
       direction: dragData.direction,
     };
@@ -290,7 +340,6 @@ const gameSetup = (function () {
   // What happens when a ship is selected
   function selectShip(clicked) {
     // Save some nodes first
-    const shipName = document.querySelector('#ship-name');
     const allShips = document.querySelectorAll('.ship');
     // Make sure only the same ships are selected
     const sameShips = document.querySelectorAll(`div[data-ship='${clicked.dataset.ship}']`);
@@ -336,6 +385,7 @@ const gameSetup = (function () {
     const shipSelection = document.querySelectorAll('[data-current]');
     shipSelection.forEach(cell => {
       cell.dataset.current = 'vertical';
+      cell.dataset.selected = 'false';
       if (cell.dataset.vertical === 'true') {
         cell.classList.add('ship');
       } else {
@@ -343,22 +393,113 @@ const gameSetup = (function () {
       }
     });
     // State and erase the players placed ship data and name
-    enterName.clear();
+    enterName.value = '';
     enterName.focus();
     confirmButton.disabled = true;
+    shipName.textContent = '';
   }
 
-  function random() {
-    // Set ships at random
+  function callRandomizer() {
+    document.dispatchEvent(new CustomEvent('randomPlacement'));
   }
 
+  function randomizeShips(placements) {
+    console.log(placements);
+    // Replace the current placements with the random ones
+    for (const ship in placements) {
+      shipPlacement[ship] = placements[ship];
+    }
+    // Reset the placement board before setting new cells
+    const placedShips = document.querySelectorAll('.cell-ship');
+    placedShips.forEach(ship => {
+      ship.classList.remove('cell-ship');
+    });
+    // Set all cells in the ship coordinates to a ship cell
+    for (const shipObject in shipPlacement) {
+      const ship = shipPlacement[shipObject];
+      const staticCoord = ship.direction === 'horizontal' ? ship.coord[0] : ship.coord[1];
+      const movingCoord = ship.direction === 'horizontal' ? ship.coord[1] : ship.coord[0];
+      const otherDirection = ship.direction === 'horizontal' ? 'vertical' : 'horizontal';
+      for (let i = 0; i < ship.size; i++) {
+        const position = movingCoord + i;
+        const cell = document.querySelector(`[data-${otherDirection}='${staticCoord}'][data-${ship.direction}='${position}']`);
+        cell.classList.add('cell-ship');
+      }
+    }
+    // disappear all ships on the selection
+    const shipSelection = document.querySelectorAll('[data-current]');
+    shipSelection.forEach(cell => {
+      cell.classList.remove('ship');
+    });
+    // check validation
+    validateUserSetup();
+  }
+
+  function humanPlayer2() {
+    setup.style.display = 'grid';
+    confirmButton.style.display = 'block';
+    resetButton.style.display = 'block';
+    randomButton.style.display = 'block';
+    cpuButton.style.display = 'none';
+    humanButton.style.display = 'none';
+  }
+
+  // Confirm a CPU player entry
+  function confirmCpuPlayer() {
+    const playerData = {name: 'CPU', cpu: true, ships: {}};
+    document.dispatchEvent(new CustomEvent('playerReady', { detail: playerData }));
+  }
+
+  // Confirm a player entry
   function confirmPlayer() {
     // create the player with the name and placed ships. 
     const playerData = {name: enterName.value, cpu: false, ships: shipPlacement};
     document.dispatchEvent(new CustomEvent('playerReady', { detail: playerData })); 
+    
   }
 
-  return { initializeGame, resetBoard };
+  // Create a random starry background
+  function createStars(player) {
+    const playerField = document.querySelector(`#player${player}`);
+    const numStars = Math.floor(Math.random() * 11) + 60; // About 60 stars
+
+    // Pick random weights of stars
+    function weightedRandom(weights) {
+      const total = Object.values(weights).reduce((a, b) => a + b, 0);
+      const rand = Math.random() * total;
+      let sum = 0;
+      for (const [key, weight] of Object.entries(weights)) {
+        sum += weight;
+        if (rand < sum) return key;
+      }
+    }
+    
+    // Set the weights for sizes and colors of stars
+    const sizeWeights = { small: 70, medium: 25, large: 5 };
+    const colorWeights = { white: 70, blue: 10, red: 10, yellow: 10 };
+
+    // For every star, set a random color and size and position
+    for (let i = 0; i < numStars; i++) {
+      const star = document.createElement('div');
+
+      const sizeClass = weightedRandom(sizeWeights);
+      const colorClass = weightedRandom(colorWeights);
+
+      star.classList.add(sizeClass, colorClass);
+
+      // Set the position but do not get too close to the border
+      const margin = 5;
+      const top = margin + Math.random() * (100 - margin * 2);
+      const left = margin + Math.random() * (100 - margin * 2);
+
+      star.style.top = `${top}%`;
+      star.style.left = `${left}%`;
+
+      playerField.appendChild(star);
+    }
+  }
+
+  return { initializeGame, resetBoard, setupPlayer2, randomizeShips };
 })();
 
 function createGameboard(player, gameboard=null) {
@@ -403,63 +544,4 @@ function createGameboard(player, gameboard=null) {
   playerField.appendChild(gameboardDiv);
 }
 
-// small -> 0,0 0,1 1,0
-// medium1 -> 0,3 0,4 0,5 1,3 2,3 
-// medium2 -> 0,6 0,7 0,8 1,6 2,6
-// large -> 4,0 4,1 4,2 4,3 5,0 6,0 7,0 
-// giant -> 4,5 4,6 4,7 4,8 4,9 5,5 6,5 7,5 8,5   
-
-// cores -> 0,0 0,3 0,6 4,0 4,5
-// horizontal -> 0,1 0,4 0,5 0,7 0,8 4,1 4,2 4,3 4,6 4,7 4,8 4,9 
-// vertical -> 1,0 1,3 2,3 1,6 2,6 5,0 6,0 7,0 5,5 6,5 7,5 8,5 
-
-// All ship cells get a 
-// class: ship
-// data-ship: small, medium1, medium2, large, giant 
-// data-type: core,horizontal or vertical
-// data-current: vertical, horizontal
-// If a ship cell is clicked, check which ship. Then, check the cell for the current orientation
-// If the ship is vertical, remove the class from all horizontal cells, add to vertical cells
-
-// Create a random starry background
-function createStars(player) {
-  const playerField = document.querySelector(`#player${player}`);
-  const numStars = Math.floor(Math.random() * 11) + 60; // About 60 stars
-
-  // Pick random weights of stars
-  function weightedRandom(weights) {
-    const total = Object.values(weights).reduce((a, b) => a + b, 0);
-    const rand = Math.random() * total;
-    let sum = 0;
-    for (const [key, weight] of Object.entries(weights)) {
-      sum += weight;
-      if (rand < sum) return key;
-    }
-  }
-  
-  // Set the weights for sizes and colors of stars
-  const sizeWeights = { small: 70, medium: 25, large: 5 };
-  const colorWeights = { white: 70, blue: 10, red: 10, yellow: 10 };
-
-  // For every star, set a random color and size and position
-  for (let i = 0; i < numStars; i++) {
-    const star = document.createElement('div');
-
-    const sizeClass = weightedRandom(sizeWeights);
-    const colorClass = weightedRandom(colorWeights);
-
-    star.classList.add(sizeClass, colorClass);
-
-    // Set the position but do not get too close to the border
-    const margin = 5;
-    const top = margin + Math.random() * (100 - margin * 2);
-    const left = margin + Math.random() * (100 - margin * 2);
-
-    star.style.top = `${top}%`;
-    star.style.left = `${left}%`;
-
-    playerField.appendChild(star);
-  }
-}
-
-export { gameSetup, createGameboard, createStars }
+export { gameSetup, createGameboard }

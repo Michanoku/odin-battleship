@@ -16,6 +16,8 @@ class cpuPlayer {
     this.targetShip = {
       coords: [hitCoords],
       suspectedDirection: '',
+      branch: false,
+      branchPoint: [],
     };
   }
 
@@ -44,37 +46,17 @@ class cpuPlayer {
     }
   }
 
-  analyzeTarget() {
-    // sort coordinate array (by changing coordinate)
-    const hits = this.targetShip.coords.length;
-    if (hits > 1) {
-      this.targetShip.coords.sort((row, col) => {
-        // Sort by row first
-        if (row[0] !== col[0]) return row[0] - col[0];
-        // If row is the same, sort by col
-        return row[1] - col[1];
-      });
-    };
-    if (hits === 1) {
-      // If hit is 1 we are at single cell, mark all adjacent non attacked cells as potential
-      this.targetBoard.markPotential(this.targetShip.coords);
-    } else if (hits === 2) {
-      // if hit is 2, calculate direction, mark non directional adjacent non attacked cells as potential false, 
-      // mark direction cells as potential (if they are possible)
-    } else if (hits <= 5) {
-      // if hit is > 2 mark direction cells as potential 
-    } else {
-      // if hit is > 5 then we definitely have adjacent ships, mark start and end coordinates of the
-      // non direction as potential if they are not yet attacked
-    }
-  }
-
   getAttackResults(result, coords) {
     // Tell gameboard to mark the cell as attacked and possibly hit
     this.targetBoard.markAttack(coords, result.hit);
     // If ship was found, and we are not in target mode, go into target mode
-    if (result.hit && !this.targetMode) {
-      this.beginTargetMode(coords);
+    if (result.hit) {
+      if (!this.targetMode) {
+        this.beginTargetMode(coords);
+      }
+      if (this.targetShip.branched) {
+        this.targetShip.branchPoint = coords;
+      }
     }
     this.targetBoard.updateMap();
   }
@@ -97,20 +79,115 @@ class targetGameboard {
     }
   }
 
-  markPotential(coords, direction = null) {
+  analyzeTarget() {
+    // sort coordinate array (by changing coordinate)
+    const hits = this.targetShip.coords.length;
+    if (hits > 1) {
+      if (!this.targetShip.direction) {
+        const firstRow = this.targetShip.coords[0][0];
+        const secondRow = this.targetShip.coords[1][0];
+        this.targetShip.direction = firstRow === secondRow ? 'horizontal' : 'vertical';
+      }
+      this.targetShip.coords.sort((row, col) => {
+        // Sort by row first
+        if (row[0] !== col[0]) return row[0] - col[0];
+        // If row is the same, sort by col
+        return row[1] - col[1];
+      });
+    };
+    this.targetBoard.markPotential(this.targetShip);
+  }
+
+  markPotential(targetShip) {
     // If we have a direction, proceed along
-    if (direction) {
-      // TODO
+    if (targetShip.direction) {
+      if (targetShip.branchPoint) {
+        const branch = this.findBranch(targetShip.coords, targetShip.branchPoint);
+        this.targetShip = {
+          coords: [targetShip.branchPoint, branch],
+          suspectedDirection: '',
+          branch: false,
+          branchPoint: [],
+        };
+        this.analyzeTarget();
+      }
+      // Add a safety check
+      let added = false;
+      // Find the direction that we are not looking for now
+      const otherDirection = targetShip.direction === 'horizontal' ? 'vertical' : 'horizontal';
+      // Check each cell in the target ship
+      targetShip.coords.forEach(coord => {
+        const [row, col] = coord;
+        const targetCell = this.grid[row][col];
+        // Remove the potential hits for non directional cells
+        const removePotential = this.getSurrounding(targetCell, otherDirection);
+        removePotential.forEach(cell => {
+          cell.potential = false;
+        });
+        // Add cells that have not been hit but are in direction
+        const addPotential = this.getSurrounding(targetCell, targetShip.direction);
+        addPotential.forEach(cell => {
+          if (!cell.attacked) {
+            cell.potential = true;
+            added = true;
+          }
+        });
+      });
+      if (targetShip.coords.length > 5 && !added) {
+        const [firstRow, firstCol] = targetShip.coords[0];
+        const [lastRow, lastCol] = targetShip.coords[targetShip.coords.length-1];
+        const firstCell = this.grid[firstRow][firstCol];
+        const lastCell = this.grid[lastRow][lastCol];
+        const addFirstPotential = this.getSurrounding(firstCell, otherDirection);
+        const addSecondPotential = this.getSurrounding(lastCell, otherDirection);
+        addFirstPotential.concat(addSecondPotential).forEach(cell => {
+          if (!cell.attacked) {
+            cell.potential = true;
+          };
+        });
+        targetShip.branch = true;
+      }
     } else {
-      const [row, col] = coords[0];
-      const cell = this.grid[row][col];
-      const surroundingCells = this.getSurrounding(cell);
+      const [row, col] = targetShip.coords[0];
+      const targetCell = this.grid[row][col];
+      const surroundingCells = this.getSurrounding(targetCell);
       surroundingCells.forEach(cell => {
         if (!cell.attacked) {
           cell.potential = true;
         }
       });
     }
+  }
+
+  findBranch(coords, branchPoint) {  
+    const [branchRow, branchCol] = branchPoint;
+    return coords.find(([row, col]) =>
+      row === branchRow || col === branchCol
+    );
+  }
+
+  // Get possible cells surrounding this cell
+  getSurrounding(cell, direction = null) {
+    const [baseRow, baseCol] = cell.coords;
+    const calculations = new Array();
+    if (direction === 'horizontal' || direction === null) {
+      calculations.push([0, -1]);
+      calculations.push([0, 1]);
+    } 
+    if (direction === 'vertical' || direction === null) {
+      calculations.push([-1, 0]);
+      calculations.push([1, 0]);
+    }
+    const checkArray = new Array();
+    calculations.forEach(coord => {
+      const [row, col] = coord;
+      const newRow = baseRow + row;
+      const newCol = baseCol + col;
+      if (newRow >= 0 && newRow <= 9 && newCol >= 0 && newCol <= 9) {
+        checkArray.push(this.grid[newRow][newCol]);
+      }
+    });
+    return checkArray;
   }
 
   markAttack(coords, hit) {
@@ -169,22 +246,6 @@ class targetGameboard {
     const surroundingCells = this.getSurrounding(targetCell);
     // Mark the cell as impossible if all surrounding cells have been attacked and there was no ship
     targetCell.possible = !surroundingCells.every(cell => cell.attacked && !cell.ship);
-  }
-
-  // Get possible cells surrounding this cell
-  getSurrounding(cell) {
-    const [baseRow, baseCol] = cell.coords;
-    const calculations = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-    const checkArray = new Array();
-    calculations.forEach(coord => {
-      const [row, col] = coord;
-      const newRow = baseRow + row;
-      const newCol = baseCol + col;
-      if (newRow >= 0 && newRow <= 9 && newCol >= 0 && newCol <= 9) {
-        checkArray.push(this.grid[newRow][newCol]);
-      }
-    });
-    return checkArray;
   }
 }
 

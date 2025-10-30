@@ -11,10 +11,10 @@ class cpuPlayer {
   }
 
   // Begins target mode after a ship has been found
-  beginTargetMode(coords) {
+  beginTargetMode(hitCoords) {
     this.targetMode = true;
     this.targetShip = {
-      coords: [coords],
+      coords: [hitCoords],
       suspectedDirection: '',
     };
   }
@@ -48,24 +48,25 @@ class cpuPlayer {
     // sort coordinate array (by changing coordinate)
     const hits = this.targetShip.coords.length;
     if (hits > 1) {
-      // TO DO SORT
+      this.targetShip.coords.sort((row, col) => {
+        // Sort by row first
+        if (row[0] !== col[0]) return row[0] - col[0];
+        // If row is the same, sort by col
+        return row[1] - col[1];
+      });
     };
     if (hits === 1) {
-
+      // If hit is 1 we are at single cell, mark all adjacent non attacked cells as potential
+      this.targetBoard.markPotential(this.targetShip.coords);
     } else if (hits === 2) {
-      
+      // if hit is 2, calculate direction, mark non directional adjacent non attacked cells as potential false, 
+      // mark direction cells as potential (if they are possible)
     } else if (hits <= 5) {
-
+      // if hit is > 2 mark direction cells as potential 
     } else {
-      
+      // if hit is > 5 then we definitely have adjacent ships, mark start and end coordinates of the
+      // non direction as potential if they are not yet attacked
     }
-    // For all cells of the ship hit so far, check possible locations to hit
-    // If hit is 1 we are at single cell, mark all adjacent non attacked cells as potential
-    // if hit is 2, calculate direction, mark non directional adjacent non attacked cells as potential false, 
-    // mark direction cells as potential (if they are possible)
-    // if hit is > 2 mark direction cells as potential 
-    // if hit is > 5 then we definitely have adjacent ships, mark start and end coordinates of the
-    // non direction as potential if they are not yet attacked
   }
 
   getAttackResults(result, coords) {
@@ -73,7 +74,7 @@ class cpuPlayer {
     this.targetBoard.markAttack(coords, result.hit);
     // If ship was found, and we are not in target mode, go into target mode
     if (result.hit && !this.targetMode) {
-      this.beginTargetMode();
+      this.beginTargetMode(coords);
     }
     this.targetBoard.updateMap();
   }
@@ -91,14 +92,30 @@ class targetGameboard {
   updateMap() {
     for (const gridRow of this.grid) {
       for (const cell of gridRow) {
-        this.targetBoard.checkCell(cell);
+        this.checkCell(cell);
       }
+    }
+  }
+
+  markPotential(coords, direction = null) {
+    // If we have a direction, proceed along
+    if (direction) {
+      // TODO
+    } else {
+      const [row, col] = coords[0];
+      const cell = this.grid[row][col];
+      const surroundingCells = this.getSurrounding(cell);
+      surroundingCells.forEach(cell => {
+        if (!cell.attacked) {
+          cell.potential = true;
+        }
+      });
     }
   }
 
   markAttack(coords, hit) {
     const [row, col] = coords;
-    const cell = this.targetBoard.grid[row][col];
+    const cell = this.grid[row][col];
     cell.attacked = true;
     cell.ship = hit;
     cell.potential = false;
@@ -163,7 +180,7 @@ class targetGameboard {
       const [row, col] = coord;
       const newRow = baseRow + row;
       const newCol = baseCol + col;
-      if (newRow > 0 && newRow < 9 && newCol > 0 && newCol < 9) {
+      if (newRow >= 0 && newRow <= 9 && newCol >= 0 && newCol <= 9) {
         checkArray.push(this.grid[newRow][newCol]);
       }
     });

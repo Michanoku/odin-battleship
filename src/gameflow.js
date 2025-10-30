@@ -47,7 +47,7 @@ const game = (function(){
   function waitForAttack() {
     document.addEventListener('fire', (event) => {
       // Process attack on the cell
-      const coords = event.details;
+      const coords = event.detail;
       const receivingPlayer = state.turn === 0 ? state.players[1] : state.players[0];
       const result = receivingPlayer.gameboard.receiveAttack(coords);
       if (result.allSunk) {

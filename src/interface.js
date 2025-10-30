@@ -22,6 +22,7 @@ const gameSetup = (function () {
   const resetButton = document.querySelector('#reset-button');
   const fireButton = document.querySelector('#fire-button');
   const newGameButton = document.querySelector('#new-game');
+  const altColorsButton = document.querySelector('#alt-colors');
 
   const player1 = document.querySelector(`#player1`);
   const player2 = document.querySelector(`#player2`); 
@@ -197,13 +198,18 @@ const gameSetup = (function () {
   }
 
   function addListeners() {
+    newGameButton.addEventListener('click', newGame);
+    altColorsButton.addEventListener('click', altColors);
     enterName.addEventListener('input', validateUserSetup);
     resetButton.addEventListener('click', resetBoard);
     confirmButton.addEventListener('click', confirmPlayer);
     randomButton.addEventListener('click', callRandomizer);
-    newGameButton.addEventListener('click', newGame);
     humanButton.addEventListener('click', humanPlayer2);
     cpuButton.addEventListener('click', confirmCpuPlayer);
+  }
+
+  function altColors() {
+    document.documentElement.classList.toggle('alt-colors');
   }
 
   function newGame() {
@@ -455,7 +461,7 @@ const gameSetup = (function () {
     randomButton.style.display = 'none';
     cpuButton.style.display = 'none';
     const playerData = {name: 'CPU', cpu: true, ships: {}};
-    document.dispatchEvent(new CustomEvent('playerReady', { detail: playerData }));
+    document.dispatchEvent(new CustomEvent('playerReady', {detail: playerData}));
   }
 
   // Confirm a player entry
@@ -466,7 +472,7 @@ const gameSetup = (function () {
     randomButton.style.display = 'none';
     cpuButton.style.display = 'none';
     const playerData = {name: enterName.value, cpu: false, ships: shipPlacement};
-    document.dispatchEvent(new CustomEvent('playerReady', { detail: playerData })); 
+    document.dispatchEvent(new CustomEvent('playerReady', {detail: playerData})); 
   }
 
   // Create a random starry background

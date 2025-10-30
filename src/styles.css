@@ -16,14 +16,12 @@
   --accent: #13E621;
   --muted: #1B4736;
   --ship-attacked: #FF1D15;
-  --ship-attacked-muted: #8f0500;
 }
 
 :root.alt-colors {
   --accent: #0072B2;
   --muted: #0A3A53;
   --ship-attacked: #E69F00;
-  --ship-attacked-muted: #996A00;
 }
 
 * {
@@ -116,7 +114,7 @@ nav {
   font-size: 1.25rem;
 }
 
-.game-button:disabled {
+.game-button:disabled, #fire-button:disabled {
   color: var(--ship-border);
   border: 0.125rem solid var(--ship-border);
   padding: 0.25rem;
@@ -128,13 +126,6 @@ nav {
   border: 0.125rem solid var(--ship-attacked);
   padding: 0.25rem;
   cursor: pointer;
-  font-size: 1.25rem;
-}
-
-#fire-button:disabled {
-  color: var(--ship-attacked-muted);
-  border: 0.125rem solid var(--ship-attacked-muted);
-  padding: 0.25rem;
   font-size: 1.25rem;
 }
 
@@ -240,20 +231,32 @@ nav {
   z-index: 0;
 }
 
-.red {
-  background-color: red;
+.star-O { 
+  background-color: #9db4ff;
 }
 
-.blue {
-  background-color: lightblue;
+.star-B { 
+  background-color: #a2b9ff; 
 }
 
-.white {
-  background-color: white;
+.star-A { 
+  background-color: #ffffff; 
 }
 
-.yellow {
-  background-color: yellow;
+.star-F { 
+  background-color: #fffa86; 
+}
+
+.star-G { 
+  background-color: #fff220; 
+}
+
+.star-K { 
+  background-color: #ff8220; 
+}
+
+.star-M { 
+  background-color: #ff6813; 
 }
 
 .gameboard {

@@ -60,7 +60,15 @@ const gameSetup = (function () {
     
     // Set the weights for sizes and colors of stars
     const sizeWeights = { small: 70, medium: 25, large: 5 };
-    const colorWeights = { white: 70, blue: 10, red: 10, yellow: 10 };
+    const colorWeights = {
+       'star-O' : 5,
+       'star-B' : 10,
+       'star-A' : 15,
+       'star-F' : 15,
+       'star-G' : 15,
+       'star-K' : 20,
+       'star-M' : 20,
+    };
 
     // For every star, set a random color and size and position
     for (let i = 0; i < numStars; i++) {
@@ -248,7 +256,7 @@ const gameSetup = (function () {
 
   // When the player selects to start a new game, initialize everything
   function newGame() {
-    const choice = confirm("Start new game? Current progress will be lost.");
+    const choice = confirm("Start a new game? Current progress will be lost.");
     if (choice) {
       // All DOM objects need to be rest to initial state
       currentPlayer.textContent = 'Player 1';
@@ -340,6 +348,7 @@ const gameSetup = (function () {
   // If player 2 is human, show appropriate content
   function humanPlayer2() {
     setup.style.display = 'grid';
+    player1.style.display = 'block';
     confirmButton.style.display = 'block';
     resetButton.style.display = 'block';
     randomButton.style.display = 'block';
@@ -496,6 +505,7 @@ const gameSetup = (function () {
     currentPlayer.textContent = 'Player 2';
     announce.textContent = 'Do you want to play against a human or the CPU?';
     setup.style.display = 'none';
+    player1.style.display = 'none';
     confirmButton.style.display = 'none';
     resetButton.style.display = 'none';
     randomButton.style.display = 'none';
@@ -569,8 +579,8 @@ const gameTurn = (function() {
 
   // Reset the maps to show 
   function resetMaps() {
-    player1.querySelector('.gameboard').remove();
-    player2.querySelector('.gameboard').remove();
+    player1.querySelector('.gameboard')?.remove();
+    player2.querySelector('.gameboard')?.remove();
   }
 
   // Add Listeners 

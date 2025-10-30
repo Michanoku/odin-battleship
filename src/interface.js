@@ -248,31 +248,34 @@ const gameSetup = (function () {
 
   // When the player selects to start a new game, initialize everything
   function newGame() {
-    // All DOM objects need to be rest to initial state
-    currentPlayer.textContent = 'Player 1';
-    confirmButton.disabled = true;
-    shipName.textContent = '';
+    const choice = confirm("Start new game? Current progress will be lost.");
+    if (choice) {
+      // All DOM objects need to be rest to initial state
+      currentPlayer.textContent = 'Player 1';
+      confirmButton.disabled = true;
+      shipName.textContent = '';
 
-    // Reset all objects 
-    document.querySelectorAll('div.gameboard').forEach(div => div.remove());
-    while (shipSelection.firstChild) {
-      shipSelection.removeChild(shipSelection.firstChild);
+      // Reset all objects 
+      document.querySelectorAll('div.gameboard').forEach(div => div.remove());
+      while (shipSelection.firstChild) {
+        shipSelection.removeChild(shipSelection.firstChild);
+      }
+      // Hide objects to hide
+      player2.style.display = 'none';
+      cpuButton.style.display = 'none';
+      // Show objects to show
+      setup.style.display = 'grid';
+      resetButton.style.display = 'block';
+      confirmButton.style.display = 'block';
+      randomButton.style.display = 'block';
+      cpuButton.style.display = 'none';
+      humanButton.style.display = 'none';
+      fireButton.style.display = 'none';
+      startButton.style.display = 'none';
+      endButton.style.display = 'none';
+      // Dispatch event to reset
+      document.dispatchEvent(new CustomEvent('initialize'));
     }
-    // Hide objects to hide
-    player2.style.display = 'none';
-    cpuButton.style.display = 'none';
-    // Show objects to show
-    setup.style.display = 'grid';
-    resetButton.style.display = 'block';
-    confirmButton.style.display = 'block';
-    randomButton.style.display = 'block';
-    cpuButton.style.display = 'none';
-    humanButton.style.display = 'none';
-    fireButton.style.display = 'none';
-    startButton.style.display = 'none';
-    endButton.style.display = 'none';
-    // Dispatch event to reset
-    document.dispatchEvent(new CustomEvent('initialize'));
   }
 
   // Allows switching between color modes for accessibility
@@ -627,15 +630,20 @@ const gameTurn = (function() {
     // Get the name of the current player and the attack details
     const name = state.players[state.turn].name;
     const readableCoords = makeReadableCoords(coords);
-    const logResult = result.hit ? 'Hit!' : 'Miss.'
+    const logResult = result.hit ? 'Hit.' : 'Miss.'
     // Remove the current gameboard and show the updated one with the attack
     player2.querySelector('.gameboard').remove();
     createGameboard('enemy', enemyGameboard);
-    // Write the log to show what happened
-    announce.textContent = `${name} attacks ${readableCoords}. ${logResult}`
-    // Show and hide elements
     fireButton.style.display = 'none';
-    endButton.style.display = 'block';
+    // Check if the game is over and show appropriate messages
+    if (result.allSunk) {
+      const attackResult = `${name} attacks ${readableCoords}. ${logResult}`;
+      const gameResult = `All ships destroyed. ${name} wins.`;
+      announce.textContent = `${attackResult} ${gameResult}`;
+    } else {
+      announce.textContent = `${name} attacks ${readableCoords}. ${logResult}`;
+      endButton.style.display = 'block';
+    }
   }
 
   // Create the gameboard visual from the gameboard data

@@ -95,10 +95,6 @@ const game = (function(){
       const receivingPlayer = state.turn === 0 ? state.players[1] : state.players[0];
       // Let the receiving players gameboard receive the attack and get the result
       const result = receivingPlayer.gameboard.receiveAttack(coords);
-      // If the result comes back all ships sunk, end the game
-      if (result.allSunk) {
-        // THE GAME IS OVER AND CURRENT PLAYER HAS WON TODO
-      }
       // Instruct the interface to show the attack result 
       gameTurn.registerAttack(state, result, coords);
     });

@@ -27,77 +27,6 @@ const gameboardManager = (function() {
       }
     }
 
-    #getAllCoords(coord, size, direction) {
-      // Create an array to house all coordinates
-      const allCoords = new Array();
-      // Get the start of the ships coordinates and the end
-      const [row, col] = coord;
-      // Add the first coordinate
-      if (direction === 'horizontal') {
-        for (let i = 0; i < size; i++) {
-          allCoords.push([row, col + i]);
-        }
-      } else {
-        for (let i = 0; i < size; i++) {
-          allCoords.push([row + i, col]);
-        }
-      }
-      return allCoords;
-    }
-
-    // Get all possible starting locations for a ship of the size
-    #getFreeCoords(shipSize) {
-      // Create array for coordinates and calculate required space next to cell
-      const freeCoords = new Array();
-      const required = shipSize - 1;
-      // Loop over the board and save all cells that have enough adjacent space
-      for (const row of this.grid) {
-        for (const cell of row) {
-          if (cell.horizontal >= required || cell.vertical >= required) {
-            freeCoords.push(cell);
-          }
-        }
-      }
-      return freeCoords;
-    }
-
-    // Get a direction for the ship to be placed (horizontal or vertical)
-    #getDirection(cell, size) {
-      // Check the possible directions for a ship of the size on that cell
-      const possibleDirections = cell.hasSpace(size);
-      // If the length is 1, there is only 1 possible location, return it
-      if (possibleDirections.length === 1) {
-        return possibleDirections[0];
-      } else {
-        // Else return one possible location at random
-        const random = Math.floor(Math.random() * 2);
-        return possibleDirections[random];
-      }
-    }
-
-    // Select a random coordinate for the ship to be placed
-    #selectRandomCoord(size) {
-      // Get an array of possible coordinates
-      const freeCoords = this.#getFreeCoords(size);
-      // Get the amount of coordinates returned and get one of them at random
-      const totalCoords = freeCoords.length;
-      const randomPosition = Math.floor(Math.random() * totalCoords);
-      return freeCoords[randomPosition];
-    }
-
-    // Place a ship of a given size on the board at random
-    #placeShipRandomly(size) {
-      // Select a random coordinate on the board
-      const cell = this.#selectRandomCoord(size);
-      // Select the direction the ship will have from the coordinate
-      const direction = this.#getDirection(cell, size);
-      // Get the actual coordinate number array
-      const coord = cell.coords;
-      // Place the ship at the location in the direction and return it
-      const ship = this.placeShip(coord, size, direction);
-      return ship;
-    }
-
     // Place a ship on the board at given coordinates and direction
     placeShip(coord, size, direction) {
       // Get the starting coordinates
@@ -121,37 +50,33 @@ const gameboardManager = (function() {
       // If a ship was placed, check and update cells neighbors
       for (let i = 0; i < 10; i++) {
         for (let j = 0; j < 10; j++) {
-          this.updateCellNeighbors(this.grid[i][j]);
+          this.#updateCellNeighbors(this.grid[i][j]);
         }
       }
       return newShip;
     }
 
-    receiveAttack(coord) {
-      // Get the targetcell of the attack and set attacked to true
+    // Get all coordinates that would allow a ship of the size to be placed
+    #getAllCoords(coord, size, direction) {
+      // Create an array to house all coordinates
+      const allCoords = new Array();
+      // Get the start of the ships coordinates and the end
       const [row, col] = coord;
-      const targetCell = this.grid[row][col];
-      targetCell.attacked = true;
-      // If there is a ship on the cell, hit it and see if its sunk
-      if (targetCell.ship) {
-        targetCell.ship.hit();
-        if(targetCell.ship.isSunk()) {
-          // If it is sunk, add it to sunk ships
-          this.sunkShips++;
-          // If all ships are sunk, return so
-          if (this.sunkShips === this.ships) {
-            return {hit: true, allSunk: true};
-          }
+      // Add the first coordinate
+      if (direction === 'horizontal') {
+        for (let i = 0; i < size; i++) {
+          allCoords.push([row, col + i]);
         }
-        // Return the attack was a hit but not all ships are sunk
-        return {hit: true, allSunk: false};
+      } else {
+        for (let i = 0; i < size; i++) {
+          allCoords.push([row + i, col]);
+        }
       }
-      // Returm the attack was not a hit and not all ships are sunk
-      return {hit: false, allSunk: false};
+      return allCoords;
     }
 
     // Update neighbors in case a ship was placed in them
-    updateCellNeighbors(cell) {
+    #updateCellNeighbors(cell) {
       // Create two variables to hold the number of free spaces in each direction
       let horizontalSpace = 0;
       let verticalSpace = 0;
@@ -185,6 +110,79 @@ const gameboardManager = (function() {
       }
     }
 
+    // Place a ship of a given size on the board at random
+    #placeShipRandomly(size) {
+      // Select a random coordinate on the board
+      const cell = this.#selectRandomCoord(size);
+      // Select the direction the ship will have from the coordinate
+      const direction = this.#getDirection(cell, size);
+      // Get the actual coordinate number array
+      const coord = cell.coords;
+      // Place the ship at the location in the direction and return it
+      const ship = this.placeShip(coord, size, direction);
+      return ship;
+    }
+
+    // Select a random coordinate for the ship to be placed
+    #selectRandomCoord(size) {
+      // Get an array of possible coordinates
+      const freeCoords = this.#getFreeCoords(size);
+      // Get the amount of coordinates returned and get one of them at random
+      const totalCoords = freeCoords.length;
+      const randomPosition = Math.floor(Math.random() * totalCoords);
+      return freeCoords[randomPosition];
+    }
+
+    // Get all possible starting locations for a ship of the size
+    #getFreeCoords(shipSize) {
+      // Create array for coordinates and calculate required space next to cell
+      const freeCoords = new Array();
+      const required = shipSize - 1;
+      // Loop over the board and save all cells that have enough adjacent space
+      for (const row of this.grid) {
+        for (const cell of row) {
+          if (cell.horizontal >= required || cell.vertical >= required) {
+            freeCoords.push(cell);
+          }
+        }
+      }
+      return freeCoords;
+    }
+
+    // Get a direction for the ship to be placed (horizontal or vertical)
+    #getDirection(cell, size) {
+      // Check the possible directions for a ship of the size on that cell
+      const possibleDirections = cell.hasSpace(size);
+      // If the length is 1, there is only 1 possible location, return it
+      if (possibleDirections.length === 1) {
+        return possibleDirections[0];
+      } else {
+        // Else return one possible location at random
+        const random = Math.floor(Math.random() * 2);
+        return possibleDirections[random];
+      }
+    }
+
+    // Place all ships randomly on the map
+    simulateRandomPlacement() {
+      const shipPlacement = {
+        'Leviathan': {coord: [], size: 5, direction: ''},
+        'Interceptor': {coord: [], size: 4, direction: ''},
+        'Cruiser': {coord: [], size: 3, direction: ''},
+        'Destroyer': {coord: [], size: 3, direction: ''},
+        'Patrol': {coord: [], size: 2, direction: ''},
+      }
+      // Place each ship one by one
+      for (const ship in shipPlacement) {
+        const size = shipPlacement[ship].size;
+        const [coord, direction] = this.#simulateRandomShip(size);
+        shipPlacement[ship].coord = coord;
+        shipPlacement[ship].direction = direction;
+      };
+      return shipPlacement;
+    }
+
+    // Simulate one ship being placed randomly
     #simulateRandomShip(size) {
       // Select a random coordinate on the board
       const cell = this.#selectRandomCoord(size);
@@ -197,22 +195,28 @@ const gameboardManager = (function() {
       return [coord, direction];
     }
 
-    simulateRandomPlacement() {
-      // Place all ships randomly on the map
-      const shipPlacement = {
-        'Leviathan': {coord: [], size: 5, direction: ''},
-        'Interceptor': {coord: [], size: 4, direction: ''},
-        'Cruiser': {coord: [], size: 3, direction: ''},
-        'Destroyer': {coord: [], size: 3, direction: ''},
-        'Patrol': {coord: [], size: 2, direction: ''},
+    // Receive the attack and return the result
+    receiveAttack(coord) {
+      // Get the targetcell of the attack and set attacked to true
+      const [row, col] = coord;
+      const targetCell = this.grid[row][col];
+      targetCell.attacked = true;
+      // If there is a ship on the cell, hit it and see if its sunk
+      if (targetCell.ship) {
+        targetCell.ship.hit();
+        if(targetCell.ship.isSunk()) {
+          // If it is sunk, add it to sunk ships
+          this.sunkShips++;
+          // If all ships are sunk, return so
+          if (this.sunkShips === this.ships) {
+            return {hit: true, allSunk: true};
+          }
+        }
+        // Return the attack was a hit but not all ships are sunk
+        return {hit: true, allSunk: false};
       }
-      for (const ship in shipPlacement) {
-        const size = shipPlacement[ship].size;
-        const [coord, direction] = this.#simulateRandomShip(size);
-        shipPlacement[ship].coord = coord;
-        shipPlacement[ship].direction = direction;
-      };
-      return shipPlacement;
+      // Returm the attack was not a hit and not all ships are sunk
+      return {hit: false, allSunk: false};
     }
   }
 
@@ -263,18 +267,20 @@ const gameboardManager = (function() {
       return available;
     }
   }
+  
+  // Create and return a new Gameboard
+  function createGameboard(ships = null) {
+    return new Gameboard(ships);
+  }
 
+  // Create a mock gameboard and return the random placement
   function randomPlacement() {
     const mockBoard = new Gameboard();
     const shipPlacement = mockBoard.simulateRandomPlacement(); 
     return shipPlacement
   }
-  
-  function createGameboard(ships = null) {
-    return new Gameboard(ships);
-  }
+
   return { createGameboard, randomPlacement }
 })();
-
 
 export { gameboardManager }

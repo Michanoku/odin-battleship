@@ -267,7 +267,7 @@ const gameboardManager = (function() {
       return available;
     }
   }
-  
+
   // Create and return a new Gameboard
   function createGameboard(ships = null) {
     return new Gameboard(ships);

@@ -13,7 +13,6 @@ class Player {
       this.enemyBoard = gameboardManager.createGameboard();
     }
   }
-  // Add CPU moves here, use enemyboard to find the enemy ships
 }
 
 export { Player }

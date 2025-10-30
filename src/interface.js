@@ -28,6 +28,7 @@ const gameSetup = (function () {
   const setup = document.querySelector('#setup');
   const shipSelection = document.querySelector('#ship-selection');
 
+  const announce = document.querySelector('#announce');
   const shipName = document.querySelector('#ship-name');
   const currentPlayer = document.querySelector('#current-player');
 
@@ -41,6 +42,7 @@ const gameSetup = (function () {
 
   function setupPlayer2() {
     currentPlayer.textContent = 'Player 2';
+    announce.textContent = 'Do you want to play against a human or the CPU?';
     setup.style.display = 'none';
     confirmButton.style.display = 'none';
     resetButton.style.display = 'none';
@@ -185,6 +187,12 @@ const gameSetup = (function () {
         shipSelection.appendChild(cell);
       }
     }
+    resetButton.style.display = 'block';
+    confirmButton.style.display = 'block';
+    confirmButton.disabled = true;
+    randomButton.style.display = 'block';
+    announce.textContent = 'Click to select a ship. Double click to rotate. Drag to place.';
+    enterName.value = '';
     enterName.focus();
   }
 
@@ -205,12 +213,7 @@ const gameSetup = (function () {
     shipName.textContent = '';
 
     // Reset all objects 
-    while (player1.firstChild) {
-      player1.removeChild(player1.firstChild);
-    }
-    while (player2.firstChild) {
-      player2.removeChild(player2.firstChild);
-    }
+    document.querySelectorAll('div.gameboard').forEach(div => div.remove());
     while (shipSelection.firstChild) {
       shipSelection.removeChild(shipSelection.firstChild);
     }
@@ -442,20 +445,28 @@ const gameSetup = (function () {
     randomButton.style.display = 'block';
     cpuButton.style.display = 'none';
     humanButton.style.display = 'none';
+    announce.textContent = 'Click to select a ship. Double click to rotate. Drag to place.';
   }
 
   // Confirm a CPU player entry
   function confirmCpuPlayer() {
+    resetButton.style.display = 'none';
+    confirmButton.style.display = 'none';
+    randomButton.style.display = 'none';
+    cpuButton.style.display = 'none';
     const playerData = {name: 'CPU', cpu: true, ships: {}};
     document.dispatchEvent(new CustomEvent('playerReady', { detail: playerData }));
   }
 
   // Confirm a player entry
   function confirmPlayer() {
-    // create the player with the name and placed ships. 
+    // create the player with the name and placed ships.
+    resetButton.style.display = 'none';
+    confirmButton.style.display = 'none';
+    randomButton.style.display = 'none';
+    cpuButton.style.display = 'none';
     const playerData = {name: enterName.value, cpu: false, ships: shipPlacement};
     document.dispatchEvent(new CustomEvent('playerReady', { detail: playerData })); 
-    
   }
 
   // Create a random starry background
@@ -504,53 +515,75 @@ const gameSetup = (function () {
 
 const gameTurn = (function() {
 
+  let attackTarget = [];
+
   const fireButton = document.querySelector('#fire-button');
   const endButton = document.querySelector('#end-button');
   const startButton = document.querySelector('#start-button');
   const player1 = document.querySelector(`#player1`);
   const player2 = document.querySelector(`#player2`); 
   const setup = document.querySelector('#setup');
+  const announce = document.querySelector('#announce');
   const currentPlayer = document.querySelector('#current-player');
 
   // Set up the first turn
-  function firstTurn() {
+  function firstTurn(name) {
+    resetMaps();
+    addListeners();
     setup.style.display = 'none';
     player1.style.display = 'none';
     player2.style.display = 'none';
-    currentPlayer.textContent = 'Player 1';
+    currentPlayer.textContent = name;
     startButton.style.display = 'block';
+    announce.textContent = `${makePossessive(name)} turn.`;
   }
 
   function resetMaps() {
-    while (player1.firstChild) {
-      player1.removeChild(player1.firstChild);
-    }
-    while (player2.firstChild) {
-      player2.removeChild(player2.firstChild);
-    }
+    document.querySelectorAll('div.gameboard').forEach(div => div.remove());
   }
 
   function addListeners() {
     fireButton.addEventListener('click', () => {
       // Carry out attack and get results back
-      // send an attack event to the gameflow, which carries out the attack
-      // gameflow sill call anohter function
+      document.dispatchEvent(new CustomEvent('fire', {detail: attackTarget}));
     });
     startButton.addEventListener('click', () => {
       // Show your current map and attack map 
-      startTurn();
+      document.dispatchEvent(new CustomEvent('requestStart'));
     });
     endButton.addEventListener('click', () => {
       // Hide maps 
     });
   }
 
-  function requestStart() {
-    document.dispatchEvent(new CustomEvent('requestStart'));
+  function startTurn(state) {
+    const otherPlayer = state.turn === 0 ? 1 : 0;
+    const playerGameboard = state.players[state.turn].gameboard;
+    const enemyGameboard = state.players[otherPlayer].gameboard;
+    createGameboard('player', playerGameboard);
+    createGameboard('enemy', enemyGameboard);
+    player1.style.display = 'block';
+    player2.style.display = 'block';
+    startButton.style.display = 'none';
+    fireButton.style.display = 'block';
+    announce.textContent = 'Select a coordinate for your attack.';
   }
 
-  function createGameboard(player, gameboard=null) {
-    const playerField = document.querySelector(`#player${player}`);
+  function registerAttack(state, result, coords) {
+    const otherPlayer = state.turn === 0 ? 1 : 0;
+    const enemyGameboard = state.players[otherPlayer].gameboard;
+    const name = state.players[state.turn].name;
+    const readableCoords = makeReadableCoords(coords);
+    const logResult = result.hit ? 'Hit!' : 'Miss.'
+    player2.querySelector('.gameboard').remove();
+    createGameboard('enemy', enemyGameboard);
+    announce.textContent = `${name} attacks ${readableCoords}. ${logResult}`
+    fireButton.style.display = 'none';
+    endButton.style.display = 'block';
+  }
+
+  function createGameboard(boardType, gameboard) {
+    const playerField = boardType === 'player' ? player1 : player2;
     const gameboardDiv = document.createElement('div');
     const coordMap = {
       1: 'A',
@@ -568,6 +601,9 @@ const gameTurn = (function() {
     for (let i = 0; i < 11; i++) {
       for (let j = 0; j < 11; j++) {
         const cell = document.createElement('div');
+        cell.classList.add(boardType);
+        cell.dataset.horizontal = j;
+        cell.dataset.vertical = i;
         if (i === 0) {
           cell.classList.add('cell-outer');
           if (j !== 0) {
@@ -578,11 +614,24 @@ const gameTurn = (function() {
           cell.textContent = coordMap[i];
         } else {
           cell.classList.add('cell-inner');
-          if (gameboard && gameboard[i-1][j-1].ship) {
-            cell.classList.add('cell-ship');
-          }
-          if (gameboard && gameboard[i-1][j-1].attacked) {
-            cell.classList.add('cell-attacked');
+          const gameboardCell = gameboard.grid[i-1][j-1];
+          if (boardType === 'player') {
+            if (gameboardCell.ship) {
+              cell.classList.add('cell-ship');
+            }
+            if (gameboardCell.attacked) {
+              cell.classList.add('cell-attacked');
+            }
+          } else {
+            if (gameboardCell.attacked) {
+              cell.classList.add('cell-attacked');
+              if (gameboardCell.ship) {
+                cell.classList.add('cell-ship');
+              }
+            }
+            cell.addEventListener('click', () => {
+              clickCell(cell);
+            })
           }
         }
         gameboardDiv.appendChild(cell);
@@ -590,7 +639,64 @@ const gameTurn = (function() {
     }
     playerField.appendChild(gameboardDiv);
   }
-  return { firstTurn }
+
+  function clickCell(cell) {
+    const currentClicked = document.querySelector('.cell-clicked');
+    if (currentClicked) {
+      const [currentOuterHorizontal, currentOuterVertical] = getOuter(currentClicked);
+      currentClicked.classList.remove('cell-clicked');
+      currentOuterHorizontal.dataset.selected = 'false';
+      currentOuterVertical.dataset.selected = 'false';
+    }
+    if (cell.classList.contains('cell-attacked')) {
+      fireButton.disabled = true;
+      return;
+    }
+    const [outerHorizontal, outerVertical] = getOuter(cell);
+    cell.classList.add('cell-clicked');
+    outerHorizontal.dataset.selected = 'true';
+    outerVertical.dataset.selected = 'true';
+    attackTarget = [parseInt(cell.dataset.horizontal) - 1, parseInt(cell.dataset.vertical) - 1];
+    fireButton.disabled = false;
+    // SET COORDINATES SOMWHERE TODO
+  }
+
+  function getOuter(cell) {
+    const horizontal = cell.dataset.horizontal;
+    const vertical = cell.dataset.vertical;
+    const horizontalOuter = document.querySelector(`.enemy[data-horizontal='${horizontal}'][data-vertical='0']`);
+    const verticalOuter = document.querySelector(`.enemy[data-horizontal='0'][data-vertical='${vertical}']`);
+    return [horizontalOuter, verticalOuter]
+  }
+
+  function makePossessive(name) {
+    name = name.trim();
+    // Check if name ends with 's' or 'S'
+    if (/[sS]$/.test(name)) {
+      return `${name}'`;
+    } else {
+      return `${name}'s`;
+    }
+  }
+
+  function makeReadableCoords(coords) {
+    const [row, col] = coords;
+    const rowMap = {
+      0: 'A',
+      1: 'B',
+      2: 'C',
+      3: 'D',
+      4: 'E',
+      5: 'F',
+      6: 'G',
+      7: 'H',
+      8: 'I',
+      9: 'J',
+    };
+    return `${rowMap[row]}${col}`;
+  }
+
+  return { firstTurn, startTurn, registerAttack }
 })();
 
 

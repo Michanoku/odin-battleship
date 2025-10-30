@@ -15,6 +15,9 @@
   --ship: #909590;
   --ship-border: #474A48;
   --ship-attacked: #FF1D15;
+  --ship-attacked-muted: #8f0500;
+  --cell-selected: #FF851B;
+  --board-margin: 8rem;
 }
 
 * {
@@ -38,8 +41,8 @@ html {
 body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 2.5rem 5rem 1fr;
-  grid-template-areas: 'nav nav' 'info action' 'player1 player2';
+  grid-template-rows: 2.5rem 3rem 1fr 2.5rem;
+  grid-template-areas: 'nav nav' 'info action' 'player1 player2' 'announce announce';
   height: 100vh;
 }
 
@@ -57,9 +60,10 @@ nav {
 
 #new-game {
   color: var(--muted);
-  border: 3px solid var(--muted);
-  padding: 3px;
+  border: 0.125rem solid var(--muted);
+  padding: 0.25rem;
   cursor: pointer;
+  font-size: 1.25rem;
 }
 
 #info, #action {
@@ -72,31 +76,45 @@ nav {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 2rem;
+  font-size: 1.625rem;
 }
 
 #action {
   grid-area: action;
   display: flex;
-  gap: 1rem;
+  gap: 0.625rem;
   justify-content: center;
   align-items: center;
 }
 
 .game-button {
   color: var(--light);
-  border: 0.25rem solid var(--light);
-  padding: 0.5rem;
+  border: 0.125rem solid var(--light);
+  padding: 0.25rem;
   cursor: pointer;
-  font-size: 1.625rem;
+  font-size: 1.25rem;
 }
 
 .game-button:disabled {
   color: var(--ship-border);
-  border: 0.25rem solid var(--ship-border);
-  padding: 0.5rem;
+  border: 0.125rem solid var(--ship-border);
+  padding: 0.25rem;
+  font-size: 1.25rem;
+}
+
+#fire-button {
+  color: var(--ship-attacked);
+  border: 0.125rem solid var(--ship-attacked);
+  padding: 0.25rem;
   cursor: pointer;
-  font-size: 1.625rem;
+  font-size: 1.25rem;
+}
+
+#fire-button:disabled {
+  color: var(--ship-attacked-muted);
+  border: 0.125rem solid var(--ship-attacked-muted);
+  padding: 0.25rem;
+  font-size: 1.25rem;
 }
 
 #human-button, #cpu-button, #fire-button, #end-button, #start-button {
@@ -120,13 +138,26 @@ nav {
   grid-area: player2;
   border-left: 1px solid var(--accent);
   display: grid;
-  grid-template-rows: 3rem 1fr 3rem;
+  grid-template-rows: 2.5rem 1fr 2.5rem;
   grid-template-areas: 'name' 'ship-selection' 'ship-name';
 }
 
+#announce {
+  border-top: 1px solid var(--accent);
+  grid-area: announce;
+  background-color: var(--space);
+  color: var(--light);
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 1.25rem;
+}
+
 #name {
-  margin-left: 8rem;
-  margin-right: 8rem;
+  margin-left: var(--board-margin);
+  margin-right: var(--board-margin);
   display: flex;
   justify-content: start;
   align-items: center;
@@ -142,8 +173,8 @@ nav {
 
 #ship-selection {
   grid-area: ship-selection;
-  margin-left: 8rem;
-  margin-right: 8rem;
+  margin-left: var(--board-margin);
+  margin-right: var(--board-margin);
   display: grid;
   grid-template-rows: repeat(9, 1fr);
   grid-template-columns: repeat(10, 1fr);
@@ -221,9 +252,17 @@ nav {
   z-index: 20;
 }
 
+.enemy[data-selected='true'] {
+  color: var(--cell-selected);
+}
+
 .cell-inner {
   border: 1px solid var(--accent);
   z-index: 20;
+}
+
+.cell-clicked {
+  border: 1px solid var(--cell-selected);
 }
 
 .cell-ship {

@@ -29,17 +29,31 @@ const game = (function(){
 
   function takeTurns() {
     // Give take turns to the player
-    waitForStart();
+    waitforStart();
     waitForAttack();
-    waitForEnd();
-    gameTurn.firstTurn();
+    //waitForEnd();
+    gameTurn.firstTurn(state.players[0].name);
     // change turn to the next player
   }
 
   function waitforStart() {
     document.addEventListener('requestStart', () => {
       // Get random ship placements from the gameboard
-      gameTurn.startTurn(state)
+      console.log("Request received.")
+      gameTurn.startTurn(state);
+    });
+  }
+
+  function waitForAttack() {
+    document.addEventListener('fire', (event) => {
+      // Process attack on the cell
+      const coords = event.details;
+      const receivingPlayer = state.turn === 0 ? state.players[1] : state.players[0];
+      const result = receivingPlayer.gameboard.receiveAttack(coords);
+      if (result.allSunk) {
+        // THE GAME IS OVER AND CURRENT PLAYER HAS WON TODO
+      }
+      gameTurn.registerAttack(state, result, coords);
     });
   }
 

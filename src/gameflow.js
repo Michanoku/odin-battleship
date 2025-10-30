@@ -31,7 +31,7 @@ const game = (function(){
     // Give take turns to the player
     waitforStart();
     waitForAttack();
-    //waitForEnd();
+    waitForEnd();
     gameTurn.firstTurn(state.players[0].name);
     // change turn to the next player
   }
@@ -39,8 +39,15 @@ const game = (function(){
   function waitforStart() {
     document.addEventListener('requestStart', () => {
       // Get random ship placements from the gameboard
-      console.log("Request received.")
       gameTurn.startTurn(state);
+    });
+  }
+
+  function waitForEnd() {
+    document.addEventListener('requestEnd', () => {
+      // Get random ship placements from the gameboard
+      state.turn = state.turn === 0 ? 1 : 0;
+      gameTurn.endTurn(state);
     });
   }
 

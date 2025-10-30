@@ -13,7 +13,7 @@ const gameSetup = (function () {
     'Interceptor': {},
     'Leviathan': {},
   }
-
+  // Required Node
   const enterName = document.querySelector('#enter-name');
   const confirmButton = document.querySelector('#confirm-button');
   const randomButton = document.querySelector('#random-button');
@@ -23,16 +23,17 @@ const gameSetup = (function () {
   const fireButton = document.querySelector('#fire-button');
   const newGameButton = document.querySelector('#new-game');
   const altColorsButton = document.querySelector('#alt-colors');
-
+  const startButton = document.querySelector('#start-button');
+  const endButton = document.querySelector('#end-button');
   const player1 = document.querySelector(`#player1`);
   const player2 = document.querySelector(`#player2`); 
   const setup = document.querySelector('#setup');
   const shipSelection = document.querySelector('#ship-selection');
-
   const announce = document.querySelector('#announce');
   const shipName = document.querySelector('#ship-name');
   const currentPlayer = document.querySelector('#current-player');
 
+  // Initialize the game by creating the background, the setups and listeners
   function initializeGame() {
     createStars(1);
     createStars(2);
@@ -41,17 +42,48 @@ const gameSetup = (function () {
     addListeners();
   }
 
-  function setupPlayer2() {
-    currentPlayer.textContent = 'Player 2';
-    announce.textContent = 'Do you want to play against a human or the CPU?';
-    setup.style.display = 'none';
-    confirmButton.style.display = 'none';
-    resetButton.style.display = 'none';
-    randomButton.style.display = 'none';
-    cpuButton.style.display = 'block';
-    humanButton.style.display = 'block';
+  // Create a random starry background
+  function createStars(player) {
+    const playerField = document.querySelector(`#player${player}`);
+    const numStars = Math.floor(Math.random() * 11) + 60; // About 60 stars
+
+    // Pick random weights of stars
+    function weightedRandom(weights) {
+      const total = Object.values(weights).reduce((a, b) => a + b, 0);
+      const rand = Math.random() * total;
+      let sum = 0;
+      for (const [key, weight] of Object.entries(weights)) {
+        sum += weight;
+        if (rand < sum) return key;
+      }
+    }
+    
+    // Set the weights for sizes and colors of stars
+    const sizeWeights = { small: 70, medium: 25, large: 5 };
+    const colorWeights = { white: 70, blue: 10, red: 10, yellow: 10 };
+
+    // For every star, set a random color and size and position
+    for (let i = 0; i < numStars; i++) {
+      const star = document.createElement('div');
+
+      const sizeClass = weightedRandom(sizeWeights);
+      const colorClass = weightedRandom(colorWeights);
+
+      star.classList.add(sizeClass, colorClass);
+
+      // Set the position but do not get too close to the border
+      const margin = 5;
+      const top = margin + Math.random() * (100 - margin * 2);
+      const left = margin + Math.random() * (100 - margin * 2);
+
+      star.style.top = `${top}%`;
+      star.style.left = `${left}%`;
+
+      playerField.appendChild(star);
+    }
   }
 
+  // Creates the board the player places ships on 
   function createSetupBoard() {
     const gameboardDiv = document.createElement('div');
     const coordMap = {
@@ -67,9 +99,11 @@ const gameSetup = (function () {
       10: 'J',
     }
     gameboardDiv.classList.add('gameboard');
+    // Create a grid of cells to place ships on
     for (let i = 0; i < 11; i++) {
       for (let j = 0; j < 11; j++) {
         const cell = document.createElement('div');
+        // Outer cells have coordinates on them
         if (i === 0) {
           cell.classList.add('cell-outer');
           if (j !== 0) {
@@ -79,6 +113,7 @@ const gameSetup = (function () {
           cell.classList.add('cell-outer');
           cell.textContent = coordMap[i];
         } else {
+          // Inner cells can accept ships
           cell.classList.add('cell-inner');
           cell.dataset.vertical = i - 1;
           cell.dataset.horizontal = j - 1;
@@ -86,7 +121,7 @@ const gameSetup = (function () {
           cell.addEventListener("dragover", (ev) => {
             ev.preventDefault(); 
           });
-          // Drop the ship
+          // Event Listener to drop a ship 
           cell.addEventListener("drop", () => {
             dropShip(cell);
           });
@@ -97,6 +132,7 @@ const gameSetup = (function () {
     player1.appendChild(gameboardDiv);
   }
 
+  // Creates the ships that can be dragged and dropped by the user
   function createShipSelection() {
     // Define coordinate groups for each class of direction and ship type
     const directionMap = {
@@ -188,30 +224,29 @@ const gameSetup = (function () {
         shipSelection.appendChild(cell);
       }
     }
+    // Set some other node to be visible and reset some values to initial values
     resetButton.style.display = 'block';
     confirmButton.style.display = 'block';
-    confirmButton.disabled = true;
     randomButton.style.display = 'block';
+    confirmButton.disabled = true;
     announce.textContent = 'Click to select a ship. Double click to rotate. Drag to place.';
     enterName.value = '';
     enterName.focus();
   }
 
+  // Add all listeners needed
   function addListeners() {
     newGameButton.addEventListener('click', newGame);
     altColorsButton.addEventListener('click', altColors);
-    enterName.addEventListener('input', validateUserSetup);
     resetButton.addEventListener('click', resetBoard);
-    confirmButton.addEventListener('click', confirmPlayer);
     randomButton.addEventListener('click', callRandomizer);
+    confirmButton.addEventListener('click', confirmPlayer);
+    enterName.addEventListener('input', validateUserSetup);
     humanButton.addEventListener('click', humanPlayer2);
     cpuButton.addEventListener('click', confirmCpuPlayer);
   }
 
-  function altColors() {
-    document.documentElement.classList.toggle('alt-colors');
-  }
-
+  // When the player selects to start a new game, initialize everything
   function newGame() {
     // All DOM objects need to be rest to initial state
     currentPlayer.textContent = 'Player 1';
@@ -234,8 +269,60 @@ const gameSetup = (function () {
     cpuButton.style.display = 'none';
     humanButton.style.display = 'none';
     fireButton.style.display = 'none';
+    startButton.style.display = 'none';
+    endButton.style.display = 'none';
     // Dispatch event to reset
     document.dispatchEvent(new CustomEvent('initialize'));
+  }
+
+  // Allows switching between color modes for accessibility
+  function altColors() {
+    document.documentElement.classList.toggle('alt-colors');
+  }
+
+  // Reset the placement board
+  function resetBoard() {
+    // Reset placed ship data
+    for (const ship in shipPlacement) {
+      shipPlacement[ship] = {};
+    }
+    // Reset ship placement
+    const placedShips = document.querySelectorAll('.cell-ship');
+    placedShips.forEach(ship => {
+      ship.classList.remove('cell-ship');
+    });
+    // Reset ship selection
+    const shipSelection = document.querySelectorAll('[data-current]');
+    shipSelection.forEach(cell => {
+      cell.dataset.current = 'vertical';
+      cell.dataset.selected = 'false';
+      if (cell.dataset.vertical === 'true') {
+        cell.classList.add('ship');
+      } else {
+        cell.classList.remove('ship');
+      }
+    });
+    // State and erase the players placed ship data and name
+    enterName.value = '';
+    enterName.focus();
+    confirmButton.disabled = true;
+    shipName.textContent = '';
+  }
+
+  // Call the randomizer (it will send a randomized board)
+  function callRandomizer() {
+    document.dispatchEvent(new CustomEvent('randomPlacement'));
+  }
+
+  // Confirm a player entry
+  function confirmPlayer() {
+    // create the player with the name and placed ships.
+    resetButton.style.display = 'none';
+    confirmButton.style.display = 'none';
+    randomButton.style.display = 'none';
+    cpuButton.style.display = 'none';
+    const playerData = {name: enterName.value, cpu: false, ships: shipPlacement};
+    document.dispatchEvent(new CustomEvent('playerReady', {detail: playerData})); 
   }
 
   // Check if the user is finished setting up
@@ -247,103 +334,25 @@ const gameSetup = (function () {
     confirmButton.disabled = !(nameValid && shipsValid);
   }
 
-  // Create a ghost image for the draggable content to replace the default
-  function createGhost(cell, size, direction) {
-    // Create a ghost grid to imitate the grid the cell is currently on
-    const ghost = document.createElement("div");
-    ghost.style.display = "grid";
-    ghost.style.position = "absolute";
-    ghost.style.top = "-9999px";
-    ghost.style.left = "-9999px";
-
-    // Set the direction based on the ship data
-    ghost.style.gridAutoFlow = direction === "horizontal" ? "column" : "row";
-
-    // Get the size of the cell 
-    const cellSize = cell.getBoundingClientRect();
-
-    // Append as many cells as needed to replicate ship size
-    for (let i = 0; i < size; i++) {
-      const clone = cell.cloneNode(true);
-      clone.style.width = `${cellSize.width}px`;
-      clone.style.height = `${cellSize.height}px`;
-      clone.style.opacity = "0.8";
-      ghost.appendChild(clone);
-    }
-    document.body.appendChild(ghost);
-    return ghost;
+  // If player 2 is human, show appropriate content
+  function humanPlayer2() {
+    setup.style.display = 'grid';
+    confirmButton.style.display = 'block';
+    resetButton.style.display = 'block';
+    randomButton.style.display = 'block';
+    cpuButton.style.display = 'none';
+    humanButton.style.display = 'none';
+    announce.textContent = 'Click to select a ship. Double click to rotate. Drag to place.';
   }
 
-  // Custom drag event
-  // https://stackoverflow.com/questions/29131466/change-ghost-image-in-html5-drag-and-drop
-  function dragShip(event, cell) {
-    // The sizes of the ships
-    const shipMap = {
-      'Patrol': 2,
-      'Cruiser': 3,
-      'Destroyer': 3,
-      'Interceptor': 4,
-      'Leviathan': 5,
-    }
-    const direction = cell.dataset.current;
-    const size = shipMap[cell.dataset.ship];
-    dragData.direction = direction;
-    dragData.size = size;
-    dragData.ship = cell.dataset.ship;
-    // Create a ghost to use instead of the default
-    const dragGhost = createGhost(cell, size, direction)
-    // Get the size and replace the default with the ghost
-    const cellSize = cell.getBoundingClientRect();
-    // Also set the cursor to the center of the ghost
-    event.dataTransfer.setDragImage(dragGhost, cellSize.width / 2, cellSize.height / 2);
-    // Once the drag is over, remove the ghost again
-    event.target.addEventListener(
-      "dragend",
-      function () {
-        dragGhost.remove();
-      },
-      { once: true }
-    );
-  };
-
-  function dropShip(cell) {
-    // Get the desired direction and the other direction
-    const direction = dragData.direction;
-    const other = direction === 'vertical' ? 'horizontal' : 'vertical';
-    // Get the static coordinate from the other direction coordiante of the cell
-    const staticCoord = cell.dataset[other];
-    // Get the direction coordinate and the required empty cells next to this one
-    const directionCoord = parseInt(cell.dataset[direction]);
-    const required = dragData.size - 1
-    // If the ship would go over the edge, return
-    if ((directionCoord + required) > 9) {
-      return;
-    } 
-    // For all cells we are about to occupy, if a ship is on any, return
-    for (let i = directionCoord; i < (directionCoord + dragData.size); i++) {
-      const targetCell = document.querySelector(`.cell-inner[data-${direction}='${i}'][data-${other}='${staticCoord}']`);
-      if (targetCell.classList.contains('cell-ship')) {
-        return;
-      }
-    }
-    // If there is no ship and no overflow, place the ship on all the cells
-    for (let i = directionCoord; i < (directionCoord + dragData.size); i++) {
-      const targetCell = document.querySelector(`.cell-inner[data-${direction}='${i}'][data-${other}='${staticCoord}']`);
-      targetCell.classList.add('cell-ship');
-    }
-    // Remove the placed ship from the ship selector
-    const selectedShip = document.querySelectorAll(`.ship[data-ship='${dragData.ship}']`);
-    selectedShip.forEach(part => {
-      part.classList.remove('ship');
-    });
-    // Save the data in the placement object
-    shipPlacement[dragData.ship] = {
-      coord: [parseInt(cell.dataset.horizontal), parseInt(cell.dataset.vertical)],
-      size: dragData.size,
-      direction: dragData.direction,
-    };
-    // Check if the user is done and if so activate confirm button
-    validateUserSetup();
+  // Confirm a CPU player entry
+  function confirmCpuPlayer() {
+    resetButton.style.display = 'none';
+    confirmButton.style.display = 'none';
+    randomButton.style.display = 'none';
+    cpuButton.style.display = 'none';
+    const playerData = {name: 'CPU', cpu: true, ships: {}};
+    document.dispatchEvent(new CustomEvent('playerReady', {detail: playerData}));
   }
 
   // What happens when a ship is selected
@@ -379,41 +388,122 @@ const gameSetup = (function () {
     });
   }
 
-  // Reset the placement board
-  function resetBoard() {
-    // Reset placed ship data
-    for (const ship in shipPlacement) {
-      shipPlacement[ship] = {};
+  // Custom drag event
+  // https://stackoverflow.com/questions/29131466/change-ghost-image-in-html5-drag-and-drop
+  function dragShip(event, cell) {
+    // The sizes of the ships
+    const shipMap = {
+      'Patrol': 2,
+      'Cruiser': 3,
+      'Destroyer': 3,
+      'Interceptor': 4,
+      'Leviathan': 5,
     }
-    // Reset ship placement
-    const placedShips = document.querySelectorAll('.cell-ship');
-    placedShips.forEach(ship => {
-      ship.classList.remove('cell-ship');
-    });
-    // Reset ship selection
-    const shipSelection = document.querySelectorAll('[data-current]');
-    shipSelection.forEach(cell => {
-      cell.dataset.current = 'vertical';
-      cell.dataset.selected = 'false';
-      if (cell.dataset.vertical === 'true') {
-        cell.classList.add('ship');
-      } else {
-        cell.classList.remove('ship');
+    const direction = cell.dataset.current;
+    const size = shipMap[cell.dataset.ship];
+    dragData.direction = direction;
+    dragData.size = size;
+    dragData.ship = cell.dataset.ship;
+    // Create a ghost to use instead of the default
+    const dragGhost = createGhost(cell, size, direction)
+    // Get the size and replace the default with the ghost
+    const cellSize = cell.getBoundingClientRect();
+    // Also set the cursor to the center of the ghost
+    event.dataTransfer.setDragImage(dragGhost, cellSize.width / 2, cellSize.height / 2);
+    // Once the drag is over, remove the ghost again
+    event.target.addEventListener(
+      "dragend",
+      function () {
+        dragGhost.remove();
+      },
+      { once: true }
+    );
+  };
+
+  // Create a ghost image for the draggable content to replace the default
+  function createGhost(cell, size, direction) {
+    // Create a ghost grid to imitate the grid the cell is currently on
+    const ghost = document.createElement("div");
+    ghost.style.display = "grid";
+    ghost.style.position = "absolute";
+    ghost.style.top = "-9999px";
+    ghost.style.left = "-9999px";
+
+    // Set the direction based on the ship data
+    ghost.style.gridAutoFlow = direction === "horizontal" ? "column" : "row";
+
+    // Get the size of the cell 
+    const cellSize = cell.getBoundingClientRect();
+
+    // Append as many cells as needed to replicate ship size
+    for (let i = 0; i < size; i++) {
+      const clone = cell.cloneNode(true);
+      clone.style.width = `${cellSize.width}px`;
+      clone.style.height = `${cellSize.height}px`;
+      clone.style.opacity = "0.8";
+      ghost.appendChild(clone);
+    }
+    document.body.appendChild(ghost);
+    return ghost;
+  }
+
+  // Allows ships to be dropped on a cell and registered
+  function dropShip(cell) {
+    // Get the desired direction and the other direction
+    const direction = dragData.direction;
+    const other = direction === 'vertical' ? 'horizontal' : 'vertical';
+    // Get the static coordinate from the other direction coordiante of the cell
+    const staticCoord = cell.dataset[other];
+    // Get the direction coordinate and the required empty cells next to this one
+    const directionCoord = parseInt(cell.dataset[direction]);
+    const required = dragData.size - 1;
+    // If the ship would go over the edge, return
+    if ((directionCoord + required) > 9) {
+      return;
+    } 
+    // For all cells we are about to occupy, if a ship is on any, return
+    for (let i = directionCoord; i < (directionCoord + dragData.size); i++) {
+      const targetCell = document.querySelector(`.cell-inner[data-${direction}='${i}'][data-${other}='${staticCoord}']`);
+      if (targetCell.classList.contains('cell-ship')) {
+        return;
       }
+    }
+    // If there is no ship and no overflow, place the ship on all the cells
+    for (let i = directionCoord; i < (directionCoord + dragData.size); i++) {
+      const targetCell = document.querySelector(`.cell-inner[data-${direction}='${i}'][data-${other}='${staticCoord}']`);
+      targetCell.classList.add('cell-ship');
+    }
+    // Remove the placed ship from the ship selector
+    const selectedShip = document.querySelectorAll(`.ship[data-ship='${dragData.ship}']`);
+    selectedShip.forEach(part => {
+      part.classList.remove('ship');
     });
-    // State and erase the players placed ship data and name
-    enterName.value = '';
-    enterName.focus();
-    confirmButton.disabled = true;
-    shipName.textContent = '';
+    // Save the data in the placement object
+    shipPlacement[dragData.ship] = {
+      coord: [parseInt(cell.dataset.vertical), parseInt(cell.dataset.horizontal)],
+      size: dragData.size,
+      direction: dragData.direction,
+    };
+    // Check if the user is done and if so activate confirm button
+    validateUserSetup();
   }
 
-  function callRandomizer() {
-    document.dispatchEvent(new CustomEvent('randomPlacement'));
+  // Player 2 can be a human or cpu
+  function setupPlayer2() {
+    currentPlayer.textContent = 'Player 2';
+    announce.textContent = 'Do you want to play against a human or the CPU?';
+    setup.style.display = 'none';
+    confirmButton.style.display = 'none';
+    resetButton.style.display = 'none';
+    randomButton.style.display = 'none';
+    cpuButton.style.display = 'block';
+    humanButton.style.display = 'block';
+    startButton.style.display = 'none';
+    endButton.style.display = 'none';
   }
 
+  // Places the random ships handed by the gameflow
   function randomizeShips(placements) {
-    console.log(placements);
     // Replace the current placements with the random ones
     for (const ship in placements) {
       shipPlacement[ship] = placements[ship];
@@ -444,85 +534,15 @@ const gameSetup = (function () {
     validateUserSetup();
   }
 
-  function humanPlayer2() {
-    setup.style.display = 'grid';
-    confirmButton.style.display = 'block';
-    resetButton.style.display = 'block';
-    randomButton.style.display = 'block';
-    cpuButton.style.display = 'none';
-    humanButton.style.display = 'none';
-    announce.textContent = 'Click to select a ship. Double click to rotate. Drag to place.';
-  }
-
-  // Confirm a CPU player entry
-  function confirmCpuPlayer() {
-    resetButton.style.display = 'none';
-    confirmButton.style.display = 'none';
-    randomButton.style.display = 'none';
-    cpuButton.style.display = 'none';
-    const playerData = {name: 'CPU', cpu: true, ships: {}};
-    document.dispatchEvent(new CustomEvent('playerReady', {detail: playerData}));
-  }
-
-  // Confirm a player entry
-  function confirmPlayer() {
-    // create the player with the name and placed ships.
-    resetButton.style.display = 'none';
-    confirmButton.style.display = 'none';
-    randomButton.style.display = 'none';
-    cpuButton.style.display = 'none';
-    const playerData = {name: enterName.value, cpu: false, ships: shipPlacement};
-    document.dispatchEvent(new CustomEvent('playerReady', {detail: playerData})); 
-  }
-
-  // Create a random starry background
-  function createStars(player) {
-    const playerField = document.querySelector(`#player${player}`);
-    const numStars = Math.floor(Math.random() * 11) + 60; // About 60 stars
-
-    // Pick random weights of stars
-    function weightedRandom(weights) {
-      const total = Object.values(weights).reduce((a, b) => a + b, 0);
-      const rand = Math.random() * total;
-      let sum = 0;
-      for (const [key, weight] of Object.entries(weights)) {
-        sum += weight;
-        if (rand < sum) return key;
-      }
-    }
-    
-    // Set the weights for sizes and colors of stars
-    const sizeWeights = { small: 70, medium: 25, large: 5 };
-    const colorWeights = { white: 70, blue: 10, red: 10, yellow: 10 };
-
-    // For every star, set a random color and size and position
-    for (let i = 0; i < numStars; i++) {
-      const star = document.createElement('div');
-
-      const sizeClass = weightedRandom(sizeWeights);
-      const colorClass = weightedRandom(colorWeights);
-
-      star.classList.add(sizeClass, colorClass);
-
-      // Set the position but do not get too close to the border
-      const margin = 5;
-      const top = margin + Math.random() * (100 - margin * 2);
-      const left = margin + Math.random() * (100 - margin * 2);
-
-      star.style.top = `${top}%`;
-      star.style.left = `${left}%`;
-
-      playerField.appendChild(star);
-    }
-  }
-
   return { initializeGame, resetBoard, setupPlayer2, randomizeShips };
 })();
 
 const gameTurn = (function() {
 
+  // The currently selected cell when targeting
   let attackTarget = [];
 
+  // Add required node
   const fireButton = document.querySelector('#fire-button');
   const endButton = document.querySelector('#end-button');
   const startButton = document.querySelector('#start-button');
@@ -544,10 +564,13 @@ const gameTurn = (function() {
     announce.textContent = `${makePossessive(name)} turn.`;
   }
 
+  // Reset the maps to show 
   function resetMaps() {
-    document.querySelectorAll('div.gameboard').forEach(div => div.remove());
+    player1.querySelector('.gameboard').remove();
+    player2.querySelector('.gameboard').remove();
   }
 
+  // Add Listeners 
   function addListeners() {
     fireButton.addEventListener('click', () => {
       // Carry out attack and get results back
@@ -558,37 +581,66 @@ const gameTurn = (function() {
       document.dispatchEvent(new CustomEvent('requestStart'));
     });
     endButton.addEventListener('click', () => {
-      // Hide maps 
+      // Hide maps and end the turn
+      document.dispatchEvent(new CustomEvent('requestEnd'));
     });
   }
 
+  // Start the players turn
   function startTurn(state) {
+    // Get the other players location in the array
     const otherPlayer = state.turn === 0 ? 1 : 0;
+    // Get the two gameboards and show them
     const playerGameboard = state.players[state.turn].gameboard;
     const enemyGameboard = state.players[otherPlayer].gameboard;
     createGameboard('player', playerGameboard);
     createGameboard('enemy', enemyGameboard);
+    // Show and hide elements
+    startButton.style.display = 'none';
     player1.style.display = 'block';
     player2.style.display = 'block';
-    startButton.style.display = 'none';
     fireButton.style.display = 'block';
     announce.textContent = 'Select a coordinate for your attack.';
   }
 
+  // End the players turn
+  function endTurn(state) {
+    // Hide maps and reset them
+    player1.style.display = 'none';
+    player2.style.display = 'none';
+    resetMaps();
+    // Hide other elements
+    fireButton.style.display = 'none';
+    endButton.style.display = 'none';
+    // Get the current players name, and change textContents
+    const name = state.players[state.turn].name;
+    currentPlayer.textContent = name;
+    announce.textContent = `${makePossessive(name)} turn.`;
+    startButton.style.display = 'block';
+  }
+
+  // Register an attack result 
   function registerAttack(state, result, coords) {
+    // Get the other players location in the array and their gameboard
     const otherPlayer = state.turn === 0 ? 1 : 0;
     const enemyGameboard = state.players[otherPlayer].gameboard;
+    // Get the name of the current player and the attack details
     const name = state.players[state.turn].name;
     const readableCoords = makeReadableCoords(coords);
     const logResult = result.hit ? 'Hit!' : 'Miss.'
+    // Remove the current gameboard and show the updated one with the attack
     player2.querySelector('.gameboard').remove();
     createGameboard('enemy', enemyGameboard);
+    // Write the log to show what happened
     announce.textContent = `${name} attacks ${readableCoords}. ${logResult}`
+    // Show and hide elements
     fireButton.style.display = 'none';
     endButton.style.display = 'block';
   }
 
+  // Create the gameboard visual from the gameboard data
   function createGameboard(boardType, gameboard) {
+    // If the board type is player, all ships can be shown, if enemy, only hits
     const playerField = boardType === 'player' ? player1 : player2;
     const gameboardDiv = document.createElement('div');
     const coordMap = {
@@ -607,6 +659,7 @@ const gameTurn = (function() {
     for (let i = 0; i < 11; i++) {
       for (let j = 0; j < 11; j++) {
         const cell = document.createElement('div');
+        // Add player or enemy class to the cell, as well as location in grid
         cell.classList.add(boardType);
         cell.dataset.horizontal = j;
         cell.dataset.vertical = i;
@@ -621,6 +674,7 @@ const gameTurn = (function() {
         } else {
           cell.classList.add('cell-inner');
           const gameboardCell = gameboard.grid[i-1][j-1];
+          // If the board is the player's show all ships and attacks by the enemy
           if (boardType === 'player') {
             if (gameboardCell.ship) {
               cell.classList.add('cell-ship');
@@ -629,12 +683,14 @@ const gameTurn = (function() {
               cell.classList.add('cell-attacked');
             }
           } else {
+            // On the enemy board, only show attacked cells (and ships in them)
             if (gameboardCell.attacked) {
               cell.classList.add('cell-attacked');
               if (gameboardCell.ship) {
                 cell.classList.add('cell-ship');
               }
             }
+            // Add the listener for a cell to be clicked to attack
             cell.addEventListener('click', () => {
               clickCell(cell);
             })
@@ -646,7 +702,9 @@ const gameTurn = (function() {
     playerField.appendChild(gameboardDiv);
   }
 
+  // Click a cell to select it for attack
   function clickCell(cell) {
+    // Deselect the current cell and their coordinate pairs
     const currentClicked = document.querySelector('.cell-clicked');
     if (currentClicked) {
       const [currentOuterHorizontal, currentOuterVertical] = getOuter(currentClicked);
@@ -654,19 +712,22 @@ const gameTurn = (function() {
       currentOuterHorizontal.dataset.selected = 'false';
       currentOuterVertical.dataset.selected = 'false';
     }
+    // Do not allow already attacked cells to be selected
     if (cell.classList.contains('cell-attacked')) {
       fireButton.disabled = true;
       return;
     }
+    // Get the outer cells to highlight them 
     const [outerHorizontal, outerVertical] = getOuter(cell);
     cell.classList.add('cell-clicked');
     outerHorizontal.dataset.selected = 'true';
     outerVertical.dataset.selected = 'true';
-    attackTarget = [parseInt(cell.dataset.horizontal) - 1, parseInt(cell.dataset.vertical) - 1];
+    // Send the current coordinate to the attackTarget variable
+    attackTarget = [parseInt(cell.dataset.vertical) - 1, parseInt(cell.dataset.horizontal) - 1];
     fireButton.disabled = false;
-    // SET COORDINATES SOMWHERE TODO
   }
 
+  // Get the outter cells that contain the coordinate symbols for highlighting
   function getOuter(cell) {
     const horizontal = cell.dataset.horizontal;
     const vertical = cell.dataset.vertical;
@@ -675,6 +736,7 @@ const gameTurn = (function() {
     return [horizontalOuter, verticalOuter]
   }
 
+  // Make the correct possessive form for the players name
   function makePossessive(name) {
     name = name.trim();
     // Check if name ends with 's' or 'S'
@@ -685,6 +747,7 @@ const gameTurn = (function() {
     }
   }
 
+  // Create a readable coordinate pair
   function makeReadableCoords(coords) {
     const [row, col] = coords;
     const rowMap = {
@@ -702,9 +765,7 @@ const gameTurn = (function() {
     return `${rowMap[row]}${col}`;
   }
 
-  return { firstTurn, startTurn, registerAttack }
+  return { firstTurn, startTurn, endTurn, registerAttack }
 })();
-
-
 
 export { gameSetup, gameTurn }

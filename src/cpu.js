@@ -2,46 +2,63 @@ import { gameboardManager } from './gameboard.js';
 
 class cpuPlayer {
   constructor() {
-    this.gameboard = gameboardManager.createGameboard();
-    this.enemyBoard = new targetGameboard;
     this.name = 'CPU';
     this.targetMode = false;
     this.targetShip = {};
+    this.gameboard = gameboardManager.createGameboard();
     this.gameboard.randomizeBoard();
+    this.targetBoard = new targetGameboard;
   }
 
+  // Begins target mode after a ship has been found
   beginTargetMode(coords) {
     this.targetMode = true;
     this.targetShip = {
       coords: [coords],
       suspectedDirection: '',
-      hits: 1,
     };
   }
 
+  // Ends target mode after all options are exhausted
   endTargetMode() {
     this.targetMode = false;
     this.targetShip = {};
   }
 
-  attackTarget() {
+  // Attacks a cell
+  attackCell() {
     if (this.targetMode) {
-      // Use target ai
+      // Analyze the target, then pick a new cell to attack
       this.analyzeTarget();
-      const targetCell = this.enemyBoard.getTargetCell();
+      const targetCell = this.targetBoard.getTargetCell();
+      // If there is no good cell, return to hunt mode
       if (!targetCell) {
         this.endTargetMode();
-        this.attackTarget();
+        return this.attackCell();
       }
-    } else {
-      // Use hunt ai
-      const targetCell = this.enemyBoard.getHuntCell();
       return targetCell.coords;
+    } else {
+      // Get a target cell to try
+      const huntCell = this.targetBoard.getHuntCell();
+      return huntCell.coords;
     }
   }
 
   analyzeTarget() {
     // sort coordinate array (by changing coordinate)
+    const hits = this.targetShip.coords.length;
+    if (hits > 1) {
+      // TO DO SORT
+    };
+    if (hits === 1) {
+
+    } else if (hits === 2) {
+      
+    } else if (hits <= 5) {
+
+    } else {
+      
+    }
     // For all cells of the ship hit so far, check possible locations to hit
     // If hit is 1 we are at single cell, mark all adjacent non attacked cells as potential
     // if hit is 2, calculate direction, mark non directional adjacent non attacked cells as potential false, 
@@ -51,28 +68,16 @@ class cpuPlayer {
     // non direction as potential if they are not yet attacked
   }
 
-  markCell(result, coords) {
-    // Get the result from the gameflow and mark the cell attacked and ship or not
-    const [row, col] = coords;
-    const cell = this.enemyBoard.grid[row][col];
-    cell.attacked = true;
+  getAttackResults(result, coords) {
+    // Tell gameboard to mark the cell as attacked and possibly hit
+    this.targetBoard.markAttack(coords, result.hit);
     // If ship was found, and we are not in target mode, go into target mode
-    if (result.hit) {
-      cell.ship = true;
-      if (!this.targetMode) {
-        this.beginTargetMode;
-      }
+    if (result.hit && !this.targetMode) {
+      this.beginTargetMode();
     }
-    this.updateMap();
+    this.targetBoard.updateMap();
   }
 
-  updateMap() {
-    for (const gridRow of this.enemyBoard.grid) {
-      for (const cell of gridRow) {
-        this.enemyBoard.checkCell(cell);
-      }
-    }
-  }
 }
 
 class targetGameboard {
@@ -83,34 +88,64 @@ class targetGameboard {
     );
   }
 
+  updateMap() {
+    for (const gridRow of this.grid) {
+      for (const cell of gridRow) {
+        this.targetBoard.checkCell(cell);
+      }
+    }
+  }
+
+  markAttack(coords, hit) {
+    const [row, col] = coords;
+    const cell = this.targetBoard.grid[row][col];
+    cell.attacked = true;
+    cell.ship = hit;
+    cell.potential = false;
+  }
+
   getHuntCell() {
     // Get all cells in a pattern if they are not hit or marked impossible
-    const targetCells = new Array();
+    const huntCells = new Array();
     for (const gridRow of this.grid) {
       for (const cell of gridRow) {
         const [row, col] = cell.coords;
         if ((row + col) % 2 === 0 && !cell.noHunt()) {
-          targetCells.push(cell);
+          huntCells.push(cell);
         }
       }
     }
-    if (!targetCells.length) {
+    if (!huntCells.length) {
       // find other cells not yet tried
       for (const gridRow of this.grid) {
         for (const cell of gridRow) {
           if (!cell.attacked) {
-            targetCells.push(cell);
+           huntCells.push(cell);
           }
         }
       }
     }
+    const randomCell = Math.floor(Math.random() * huntCells.length);
+    return huntCells[randomCell];
+  }
+
+  // Get a cell marked as potential target
+  getTargetCell() {
+    const targetCells = new Array();
+    for (const gridRow of this.grid) {
+      for (const cell of gridRow) {
+        if (cell.potential) {
+          targetCells.push(cell);
+        }
+      }
+    }
+    // If no potential targets remain return null
+    if (!targetCells.length) {
+      return null;
+    }
     const randomCell = Math.floor(Math.random() * targetCells.length);
     return targetCells[randomCell];
   }
-
-  checkSurroundings() { 
-  }
-
   
   checkCell(targetCell) {
     // Get all surrounding cells

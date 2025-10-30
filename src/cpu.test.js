@@ -13,13 +13,13 @@ test('CPU creation.', () => {
 
 test('Hunt Targeting.', () => {
   const CPU = new cpuPlayer;
-  const [targetRow, targetCol] = CPU.attackTarget();
+  const [targetRow, targetCol] = CPU.attackCell();
   expect((targetRow + targetCol) % 2).toBe(0);
 });
 
 test('Miss.', () => {
   const CPU = new cpuPlayer;
-  const [targetRow, targetCol] = CPU.attackTarget();
+  const [targetRow, targetCol] = CPU.attackCell();
   const mockResult = {hit: false};
   CPU.markCell(mockResult, [targetRow, targetCol]);
   const cell = CPU.enemyBoard.grid[targetRow][targetCol];

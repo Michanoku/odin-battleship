@@ -363,6 +363,7 @@ const gameSetup = (function () {
     resetButton.style.display = 'none';
     confirmButton.style.display = 'none';
     randomButton.style.display = 'none';
+    humanButton.style.display = 'none';
     cpuButton.style.display = 'none';
     const data = {cpu: true};
     document.dispatchEvent(new CustomEvent('playerReady', {detail: data})); 
@@ -790,6 +791,7 @@ const gameTurn = (function() {
 
   // Create a readable coordinate pair
   function makeReadableCoords(coords) {
+    // Exchange row integer with letter, add 1 to col
     const [row, col] = coords;
     const rowMap = {
       0: 'A',
@@ -803,7 +805,7 @@ const gameTurn = (function() {
       8: 'I',
       9: 'J',
     };
-    return `${rowMap[row]}${col}`;
+    return `${rowMap[row]}${col + 1}`;
   }
 
   return { firstTurn, startTurn, endTurn, registerAttack, registerCpuAttack }

@@ -34,12 +34,14 @@ const gameSetup = (function () {
   const currentPlayer = document.querySelector('#current-player');
 
   // Initialize the game by creating the background, the setups and listeners
-  function initializeGame() {
-    createStars(1);
-    createStars(2);
+  function initializeGame(timing) {
+    if (timing === 'initial') {
+      createStars(1);
+      createStars(2);
+      addGameListeners();
+    }
     createSetupBoard();
     createShipSelection();
-    addListeners();
   }
 
   // Create a random starry background
@@ -243,7 +245,7 @@ const gameSetup = (function () {
   }
 
   // Add all listeners needed
-  function addListeners() {
+  function addGameListeners() {
     newGameButton.addEventListener('click', newGame);
     altColorsButton.addEventListener('click', altColors);
     resetButton.addEventListener('click', resetBoard);
@@ -268,6 +270,7 @@ const gameSetup = (function () {
       while (shipSelection.firstChild) {
         shipSelection.removeChild(shipSelection.firstChild);
       }
+      resetMaps();
       // Hide objects to hide
       player2.style.display = 'none';
       cpuButton.style.display = 'none';
@@ -284,6 +287,12 @@ const gameSetup = (function () {
       // Dispatch event to reset
       document.dispatchEvent(new CustomEvent('initialize'));
     }
+  }
+
+  function resetMaps() {
+    [player1, player2].forEach(player =>
+      player.querySelectorAll('.gameboard').forEach(el => el.remove())
+    );
   }
 
   // Allows switching between color modes for accessibility
@@ -556,6 +565,8 @@ const gameTurn = (function() {
 
   // The currently selected cell when targeting
   let attackTarget = [];
+  let turnEnd = false;
+  let initialized = false;
 
   // Add required node
   const fireButton = document.querySelector('#fire-button');
@@ -569,8 +580,11 @@ const gameTurn = (function() {
 
   // Set up the first turn
   function firstTurn(name) {
+    if (!initialized) {
+      addTurnListeners();
+      initialized = true;
+    }
     resetMaps();
-    addListeners();
     setup.style.display = 'none';
     player1.style.display = 'none';
     player2.style.display = 'none';
@@ -581,12 +595,13 @@ const gameTurn = (function() {
 
   // Reset the maps to show 
   function resetMaps() {
-    player1.querySelector('.gameboard')?.remove();
-    player2.querySelector('.gameboard')?.remove();
+    [player1, player2].forEach(player =>
+      player.querySelectorAll('.gameboard').forEach(el => el.remove())
+    );
   }
 
   // Add Listeners 
-  function addListeners() {
+  function addTurnListeners() {
     fireButton.addEventListener('click', () => {
       // Carry out attack and get results back
       document.dispatchEvent(new CustomEvent('fire', {detail: attackTarget}));
@@ -616,6 +631,7 @@ const gameTurn = (function() {
     player2.style.display = 'block';
     fireButton.style.display = 'block';
     announce.textContent = 'Select a coordinate for your attack.';
+    turnEnd = false;
   }
 
   // End the players turn
@@ -655,6 +671,7 @@ const gameTurn = (function() {
     } else {
       announce.textContent = `${name} attacks ${readableCoords}. ${logResult}`;
       endButton.style.display = 'block';
+      turnEnd = true;
     }
   }
 
@@ -677,6 +694,7 @@ const gameTurn = (function() {
     } else {
       announce.textContent = `${name} attacks ${readableCoords}. ${logResult}`;
       fireButton.style.display = 'block';
+      turnEnd = false;
     }
   }
 
@@ -755,7 +773,7 @@ const gameTurn = (function() {
       currentOuterVertical.dataset.selected = 'false';
     }
     // Do not allow already attacked cells to be selected
-    if (cell.classList.contains('cell-attacked')) {
+    if (cell.classList.contains('cell-attacked') || turnEnd) {
       fireButton.disabled = true;
       return;
     }

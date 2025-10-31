@@ -11,6 +11,7 @@ const game = (function(){
   const state = {
     players: new Array(),
     turn: 0,
+    initializedTurns: false,
   };
 
   // Create a player and push it to the players array
@@ -34,19 +35,22 @@ const game = (function(){
     // Wait for players to request random ship placement
     waitForRandomPlacement();
     // Initialize the game
-    gameSetup.initializeGame();
+    gameSetup.initializeGame('initial');
   }
   
   // This starts the game phase of taking turns between players
   function takeTurns() {
-    // Wait for a player to start their turn
-    waitforStart();
-    // Wait for a player to attack
-    waitForAttack();
-    // Wait for a player to end their turn
-    waitForEnd();
+    if (!state.initializedTurns) {
+      // Wait for a player to start their turn
+      waitforStart();
+      // Wait for a player to attack
+      waitForAttack();
+      // Wait for a player to end their turn
+      waitForEnd();
+      state.initializedTurns = true;
+    }
     // Direct the interface to initialize the first turn
-    gameTurn.firstTurn(state.players[0].name);
+    gameTurn.firstTurn(state.players[0].name, state.initializedTurns);
   }
 
   // Wait for players to finish their setup
@@ -69,8 +73,9 @@ const game = (function(){
     document.addEventListener('initialize', () => {
       // Reset all states
       state.players = new Array();
+      state.turn = 0;
       // Initialize the game from the start
-      gameSetup.initializeGame();
+      gameSetup.initializeGame('new');
     });
   }
 

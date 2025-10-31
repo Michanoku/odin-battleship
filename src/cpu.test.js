@@ -116,7 +116,7 @@ test('End target mode and return to hunt mode.', () => {
   expect(CPU.targetMode).toBe(false);
 });
 
-test.only('Hit 6 targets and have the CPU try a branch', () => {
+test('Hit 6 targets and have the CPU try a branch', () => {
   const CPU = new cpuPlayer;
   const mockHit = {hit: true};
   CPU.getAttackResults(mockHit, [5, 2]);

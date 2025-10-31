@@ -1,8 +1,8 @@
-import { gameboardManager } from './gameboard.js';
+import { createGameboard } from './gameboard.js';
 
 class Player {
   constructor(name, ships) {
-    this.gameboard = gameboardManager.createGameboard(ships);
+    this.gameboard = createGameboard(ships);
     this.enemyBoard = null;
     this.name = name;
     this.cpu = false;

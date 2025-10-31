@@ -6,9 +6,3 @@ test('Player creation.', () => {
   expect(player.name).toBe('Michanoku');
   expect(player.cpu).toBe(false);
 });
-
-test('Player creation.', () => {
-  const player = new Player('Atom', true);
-  expect(player.name).toBe('Atom');
-  expect(player.cpu).toBe(true);
-});

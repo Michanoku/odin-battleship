@@ -1,4 +1,4 @@
-import { gameboardManager } from './gameboard.js';
+import { createGameboard } from './gameboard.js';
 
 class cpuPlayer {
   constructor() {
@@ -6,7 +6,7 @@ class cpuPlayer {
     this.cpu = true;
     this.targetMode = false;
     this.targetShip = {};
-    this.gameboard = gameboardManager.createGameboard();
+    this.gameboard = createGameboard();
     this.gameboard.randomizeBoard();
     this.targetBoard = new targetGameboard;
   }
@@ -15,7 +15,7 @@ class cpuPlayer {
   attackCell() {
     if (this.targetMode) {
       // Analyze the target, then pick a new cell to attack
-      this.#analyzeTarget();
+      this.analyzeTarget();
       const targetCell = this.targetBoard.getTargetCell();
       // If there is no good cell, return to hunt mode
       if (!targetCell) {
@@ -30,7 +30,7 @@ class cpuPlayer {
     }
   }
 
-  #analyzeTarget() {
+  analyzeTarget() {
     // sort coordinate array (by changing coordinate)
     const hits = this.targetShip.coords.length;
     if (hits > 1) {
@@ -64,7 +64,7 @@ class cpuPlayer {
           branchPoint: null,
         };
         // Analyze target with the new data 
-        this.#analyzeTarget();
+        this.analyzeTarget();
       }
       // Add a safety check, in case nothing is found
       let added = 0;

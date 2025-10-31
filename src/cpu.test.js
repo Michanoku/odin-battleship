@@ -83,7 +83,6 @@ test('Mark potential with existing.', () => {
   expect(CPU.targetBoard.grid[5][4].potential).toBe(true);
 });
 
-
 test('Mark potential with 2 and get direction.', () => {
   const CPU = new cpuPlayer;
   const mockHit = {hit: true};
@@ -97,4 +96,80 @@ test('Mark potential with 2 and get direction.', () => {
   expect(CPU.targetBoard.grid[4][6].potential).toBe(false);
   expect(CPU.targetBoard.grid[5][4].potential).toBe(true);
   expect(CPU.targetBoard.grid[5][7].potential).toBe(true);
+});
+
+test('End target mode and return to hunt mode.', () => {
+  const CPU = new cpuPlayer;
+  const mockHit = {hit: true};
+  CPU.getAttackResults(mockHit, [5, 5]);
+  CPU.analyzeTarget();
+  CPU.getAttackResults(mockHit, [5, 6]);
+  CPU.analyzeTarget();
+  const mockMiss = {hit: false};
+  // Let the CPU decide which cell to pick
+  const coords1 = CPU.attackCell();
+  CPU.getAttackResults(mockMiss, coords1);
+  expect(CPU.targetMode).toBe(true);
+  const coords2 = CPU.attackCell();
+  CPU.getAttackResults(mockMiss, coords2);
+  const coords3 = CPU.attackCell();
+  expect(CPU.targetMode).toBe(false);
+});
+
+test.only('Hit 6 targets and have the CPU try a branch', () => {
+  const CPU = new cpuPlayer;
+  const mockHit = {hit: true};
+  CPU.getAttackResults(mockHit, [5, 2]);
+  CPU.getAttackResults(mockHit, [5, 3]);
+  CPU.getAttackResults(mockHit, [5, 4]);
+  CPU.getAttackResults(mockHit, [5, 5]);
+  CPU.getAttackResults(mockHit, [5, 6]);
+  CPU.analyzeTarget();
+  expect(CPU.targetShip.branch).toBe(false);
+  expect(CPU.targetShip.direction).toBe('horizontal');
+  expect(CPU.targetShip.branchPoint).toBe(null);
+  // At this point we have reached maximum length, add one more coordinate
+  CPU.getAttackResults(mockHit, [5, 7]);
+  // There should be only 2 viable coordinates now, 5, 1 and 5, 8
+  const mockMiss = {hit: false};
+  const coords1 = CPU.attackCell();
+  expect(
+    JSON.stringify(coords1) === JSON.stringify([5, 1]) ||
+    JSON.stringify(coords1) === JSON.stringify([5, 8])
+  ).toBe(true);
+  CPU.getAttackResults(mockMiss, coords1);
+  const coords2 = CPU.attackCell();
+  expect(
+    JSON.stringify(coords1) === JSON.stringify([5, 1]) ||
+    JSON.stringify(coords1) === JSON.stringify([5, 8])
+  ).toBe(true);
+  CPU.getAttackResults(mockMiss, coords2);
+  const coords3 = CPU.attackCell();
+  // Now the CPU should have realized we are branching and add the following coordinates:
+  // 6, 2 | 4, 2 | 6, 7 | 4, 7
+  // Also, branch should be active
+  expect(
+    JSON.stringify(coords3) === JSON.stringify([6, 2]) ||
+    JSON.stringify(coords3) === JSON.stringify([4, 2]) ||
+    JSON.stringify(coords3) === JSON.stringify([6, 7]) ||
+    JSON.stringify(coords3) === JSON.stringify([4, 7])
+  ).toBe(true);
+  expect(CPU.targetShip.branch).toBe(true);
+  // Now let 3 of the 4 coordinates miss and hit the 6th, activating branch calculation
+  CPU.getAttackResults(mockMiss, coords3);
+  const coords4 = CPU.attackCell();
+  CPU.getAttackResults(mockMiss, coords4);
+  const coords5 = CPU.attackCell();
+  CPU.getAttackResults(mockMiss, coords5);
+  const coords6 = CPU.attackCell();
+  CPU.getAttackResults(mockHit, coords6);
+  // Now CPU should have saved the branch point
+  expect(CPU.targetShip.branchPoint).toBe(coords6);
+  // Now with the branch point known the only viable hit would be next to coords 6, below or above
+  const coords7 = CPU.attackCell();
+  const [row6, col6] = coords6;
+  expect([[row6 - 1, col6], [row6 + 1, col6]]).toContainEqual(coords7);
+  expect(CPU.targetShip.direction).toBe('vertical');
+  expect(CPU.targetShip.branch).toBe(false);
+  expect(CPU.targetShip.branchPoint).toBe(null);
 });

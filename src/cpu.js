@@ -63,57 +63,59 @@ class cpuPlayer {
         return row[1] - col[1];
       });
     };
-    this.markPotential(this.targetShip);
+    this.markPotential();
   }
 
-  markPotential(targetShip) {
+  markPotential() {
     // If we have a direction, proceed along
-    if (targetShip.direction) {
+    if (this.targetShip.direction) {
       // If a branchpoint was detected, reset coordinates to follow along the branch
-      if (targetShip.branchPoint) {
+      if (this.targetShip.branchPoint) {
         // Find the branching coordinate from the branchpoint
-        const branch = this.findBranch(targetShip.coords, targetShip.branchPoint);
+        const branch = this.findBranch(this.targetShip.coords, this.targetShip.branchPoint);
+        const branchPoint = this.targetShip.branchPoint;
         this.targetShip = {
-          coords: [targetShip.branchPoint, branch],
+          coords: [branchPoint, branch],
           suspectedDirection: '',
           branch: false,
           branchPoint: null,
         };
         // Analyze target with the new data 
-        this.analyzeTarget(targetShip);
+        this.analyzeTarget();
       }
       // Add a safety check, in case nothing is found
       let added = 0;
       // Find the direction that we are not looking for now
-      const otherDirection = targetShip.direction === 'horizontal' ? 'vertical' : 'horizontal';
+      const otherDirection = this.targetShip.direction === 'horizontal' ? 'vertical' : 'horizontal';
       // Check each cell in the target ship
-      targetShip.coords.forEach(coord => {
+      this.targetShip.coords.forEach(coord => {
         // Remove the potential hits for non directional cells
         this.targetBoard.removePotential(coord, otherDirection);
         // Add cells that have not been hit but are in direction
-        added += this.targetBoard.addPotential(coord, targetShip.direction);
+        added += this.targetBoard.addPotential(coord, this.targetShip.direction);
       });
       // If ship length invalid and nothing has been added, find adjacent ship
-      if (targetShip.coords.length > 5 && !added) {
-        const start = targetShip.coords[0];
-        const end = targetShip.coords[targetShip.coords.length-1];
+      if (this.targetShip.coords.length > 5 && !added) {
+        const start = this.targetShip.coords[0];
+        const end = this.targetShip.coords[this.targetShip.coords.length-1];
         // Check the edges of the current target for potential targets
         this.targetBoard.checkEdgePotential(start, end, otherDirection);
         // Mark the targetShip as branched
-        targetShip.branch = true;
+        this.targetShip.branch = true;
       }
     } else {
       // If there is no direction, we are dealing with single cell target
-      const coords = targetShip.coords[0];
+      const coords = this.targetShip.coords[0];
       this.targetBoard.markSingle(coords)
     }
   }
 
-  // Find the branching connection between the coordinates and branchpoint
+  // Find the branching connection between the coordinates and branchpoint (but not the branchpoint itself)
   findBranch(coords, branchPoint) {  
     const [branchRow, branchCol] = branchPoint;
     return coords.find(([row, col]) =>
-      row === branchRow || col === branchCol
+      (row === branchRow || col === branchCol) &&
+      !(row === branchRow && col === branchCol)
     );
   }
 
@@ -127,7 +129,7 @@ class cpuPlayer {
       } else {
         this.targetShip.coords.push(coords);
       }
-      if (this.targetShip.branched) {
+      if (this.targetShip.branch) {
         this.targetShip.branchPoint = coords;
       }
     }

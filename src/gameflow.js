@@ -1,6 +1,7 @@
 import "./styles.css";
 
 import { Player } from './players.js';
+import { cpuPlayer } from './cpu.js';
 import { gameboardManager } from './gameboard.js';
 import { gameSetup, gameTurn } from './interface.js';
 
@@ -14,10 +15,14 @@ const game = (function(){
 
   // Create a player and push it to the players array
   function addPlayer(data) {
-    const name = data.name;
-    const cpu = data.cpu;
-    const ships = data.ships
-    state.players.push(new Player(name, cpu, ships));
+    if (data.cpu) {
+      state.players.push(new cpuPlayer());
+    } else {
+      const playerData = data.playerData;
+      const name = playerData.name;
+      const ships = playerData.ships;
+      state.players.push(new Player(name, ships));
+    }
   }
 
   // Start the game
@@ -105,8 +110,22 @@ const game = (function(){
     document.addEventListener('requestEnd', () => {
       // Set turn to the next turn 
       state.turn = state.turn === 0 ? 1 : 0;
-      // Instruct the interface to end the turn
-      gameTurn.endTurn(state);
+      // If the player is a cpu, take it's turn
+      if (state.players[state.turn].cpu) {
+        const cpu = state.players[state.turn];
+        const humanPlayer = state.turn === 0 ? state.players[1] : state.players[0];
+        // Let the cpu decide on an attack coordinate
+        const attackCoords = cpu.attackCell();
+        // Let the human players gameboard receive the attack and get the result
+        const result = humanPlayer.gameboard.receiveAttack(attackCoords);
+        // Let the cpu know about the attack result
+        cpu.getAttackResults(result, attackCoords);
+        state.turn = state.turn === 0 ? 1 : 0;
+        gameTurn.registerCpuAttack(humanPlayer, result, attackCoords);
+      } else {
+        // Instruct the interface to end the turn
+        gameTurn.endTurn(state);
+      }
     });
   }
 

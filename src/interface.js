@@ -333,7 +333,8 @@ const gameSetup = (function () {
     randomButton.style.display = 'none';
     cpuButton.style.display = 'none';
     const playerData = {name: enterName.value, cpu: false, ships: shipPlacement};
-    document.dispatchEvent(new CustomEvent('playerReady', {detail: playerData})); 
+    const data = {cpu: false, playerData: playerData};
+    document.dispatchEvent(new CustomEvent('playerReady', {detail: data})); 
   }
 
   // Check if the user is finished setting up
@@ -363,8 +364,8 @@ const gameSetup = (function () {
     confirmButton.style.display = 'none';
     randomButton.style.display = 'none';
     cpuButton.style.display = 'none';
-    const playerData = {name: 'CPU', cpu: true, ships: {}};
-    document.dispatchEvent(new CustomEvent('playerReady', {detail: playerData}));
+    const data = {cpu: true};
+    document.dispatchEvent(new CustomEvent('playerReady', {detail: data})); 
   }
 
   // What happens when a ship is selected
@@ -656,6 +657,28 @@ const gameTurn = (function() {
     }
   }
 
+   // Register an attack result 
+  function registerCpuAttack(player, result, coords) {
+    // Get the gameboard and other data
+    const gameboard = player.gameboard;
+    const name = 'CPU';
+    const readableCoords = makeReadableCoords(coords);
+    const logResult = result.hit ? 'Hit.' : 'Miss.'
+    // Remove the current gameboard and show the updated one with the attack
+    player1.querySelector('.gameboard').remove();
+    createGameboard('player', gameboard);
+    endButton.style.display = 'none';
+    // Check if the game is over and show appropriate messages
+    if (result.allSunk) {
+      const attackResult = `${name} attacks ${readableCoords}. ${logResult}`;
+      const gameResult = `All ships destroyed. ${name} wins.`;
+      announce.textContent = `${attackResult} ${gameResult}`;
+    } else {
+      announce.textContent = `${name} attacks ${readableCoords}. ${logResult}`;
+      fireButton.style.display = 'block';
+    }
+  }
+
   // Create the gameboard visual from the gameboard data
   function createGameboard(boardType, gameboard) {
     // If the board type is player, all ships can be shown, if enemy, only hits
@@ -783,7 +806,7 @@ const gameTurn = (function() {
     return `${rowMap[row]}${col}`;
   }
 
-  return { firstTurn, startTurn, endTurn, registerAttack }
+  return { firstTurn, startTurn, endTurn, registerAttack, registerCpuAttack }
 })();
 
 export { gameSetup, gameTurn }

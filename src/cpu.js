@@ -3,6 +3,7 @@ import { gameboardManager } from './gameboard.js';
 class cpuPlayer {
   constructor() {
     this.name = 'CPU';
+    this.cpu = true;
     this.targetMode = false;
     this.targetShip = {};
     this.gameboard = gameboardManager.createGameboard();
@@ -10,32 +11,15 @@ class cpuPlayer {
     this.targetBoard = new targetGameboard;
   }
 
-  // Begins target mode after a ship has been found
-  beginTargetMode(hitCoords) {
-    this.targetMode = true;
-    this.targetShip = {
-      coords: [hitCoords],
-      suspectedDirection: '',
-      branch: false,
-      branchPoint: null,
-    };
-  }
-
-  // Ends target mode after all options are exhausted
-  endTargetMode() {
-    this.targetMode = false;
-    this.targetShip = {};
-  }
-
   // Attacks a cell
   attackCell() {
     if (this.targetMode) {
       // Analyze the target, then pick a new cell to attack
-      this.analyzeTarget();
+      this.#analyzeTarget();
       const targetCell = this.targetBoard.getTargetCell();
       // If there is no good cell, return to hunt mode
       if (!targetCell) {
-        this.endTargetMode();
+        this.#endTargetMode();
         return this.attackCell();
       }
       return targetCell.coords;
@@ -46,8 +30,7 @@ class cpuPlayer {
     }
   }
 
-
-  analyzeTarget() {
+  #analyzeTarget() {
     // sort coordinate array (by changing coordinate)
     const hits = this.targetShip.coords.length;
     if (hits > 1) {
@@ -63,16 +46,16 @@ class cpuPlayer {
         return row[1] - col[1];
       });
     };
-    this.markPotential();
+    this.#markPotential();
   }
 
-  markPotential() {
+  #markPotential() {
     // If we have a direction, proceed along
     if (this.targetShip.direction) {
       // If a branchpoint was detected, reset coordinates to follow along the branch
       if (this.targetShip.branchPoint) {
         // Find the branching coordinate from the branchpoint
-        const branch = this.findBranch(this.targetShip.coords, this.targetShip.branchPoint);
+        const branch = this.#findBranch(this.targetShip.coords, this.targetShip.branchPoint);
         const branchPoint = this.targetShip.branchPoint;
         this.targetShip = {
           coords: [branchPoint, branch],
@@ -81,7 +64,7 @@ class cpuPlayer {
           branchPoint: null,
         };
         // Analyze target with the new data 
-        this.analyzeTarget();
+        this.#analyzeTarget();
       }
       // Add a safety check, in case nothing is found
       let added = 0;
@@ -110,8 +93,25 @@ class cpuPlayer {
     }
   }
 
+  // Begins target mode after a ship has been found
+  #beginTargetMode(hitCoords) {
+    this.targetMode = true;
+    this.targetShip = {
+      coords: [hitCoords],
+      suspectedDirection: '',
+      branch: false,
+      branchPoint: null,
+    };
+  }
+
+  // Ends target mode after all options are exhausted
+  #endTargetMode() {
+    this.targetMode = false;
+    this.targetShip = {};
+  }
+
   // Find the branching connection between the coordinates and branchpoint (but not the branchpoint itself)
-  findBranch(coords, branchPoint) {  
+  #findBranch(coords, branchPoint) {  
     const [branchRow, branchCol] = branchPoint;
     return coords.find(([row, col]) =>
       (row === branchRow || col === branchCol) &&
@@ -125,7 +125,7 @@ class cpuPlayer {
     // If ship was found, and we are not in target mode, go into target mode
     if (result.hit) {
       if (!this.targetMode) {
-        this.beginTargetMode(coords);
+        this.#beginTargetMode(coords);
       } else {
         this.targetShip.coords.push(coords);
       }
@@ -149,14 +149,21 @@ class targetGameboard {
   updateMap() {
     for (const gridRow of this.grid) {
       for (const cell of gridRow) {
-        this.checkCell(cell);
+        this.#checkCell(cell);
       }
     }
+  }
+ 
+  #checkCell(targetCell) {
+    // Get all surrounding cells
+    const surroundingCells = this.#getSurrounding(targetCell.coords);
+    // Mark the cell as impossible if all surrounding cells have been attacked and there was no ship
+    targetCell.possible = !surroundingCells.every(cell => cell.attacked && !cell.ship);
   }
 
   // Remove the potential targets along the direction
   removePotential(coords, direction) {
-    const coordArray = this.getSurrounding(coords, direction);
+    const coordArray = this.#getSurrounding(coords, direction);
     coordArray.forEach(cell => {
       cell.potential = false;
     });
@@ -165,7 +172,7 @@ class targetGameboard {
   // Add the potential targets along the direction
   addPotential(coords, direction) {
     let added = 0;
-    const coordArray = this.getSurrounding(coords, direction);
+    const coordArray = this.#getSurrounding(coords, direction);
     coordArray.forEach(cell => {
       if (!cell.attacked) {
         cell.potential = true;
@@ -177,8 +184,8 @@ class targetGameboard {
 
   // Check the potential targets on the edges
   checkEdgePotential(start, end, direction) {
-    const addFirstPotential = this.getSurrounding(start, direction);
-    const addSecondPotential = this.getSurrounding(end, direction);
+    const addFirstPotential = this.#getSurrounding(start, direction);
+    const addSecondPotential = this.#getSurrounding(end, direction);
     addFirstPotential.concat(addSecondPotential).forEach(cell => {
       if (!cell.attacked) {
         cell.potential = true;
@@ -188,7 +195,7 @@ class targetGameboard {
 
   // Check potential for a single cell
   markSingle(coords) {
-    const surroundingCells = this.getSurrounding(coords);
+    const surroundingCells = this.#getSurrounding(coords);
     surroundingCells.forEach(cell => {
       if (!cell.attacked) {
         cell.potential = true;
@@ -197,7 +204,7 @@ class targetGameboard {
   }
 
   // Get possible cells surrounding this cell
-  getSurrounding(baseCoords, direction = null) {
+  #getSurrounding(baseCoords, direction = null) {
     const [baseRow, baseCol] = baseCoords;
     const calculations = new Array();
     // Add needed calculations for horizontal, vertical or both
@@ -252,6 +259,7 @@ class targetGameboard {
         }
       }
     }
+    // Pick a random cell from the array
     const randomCell = Math.floor(Math.random() * huntCells.length);
     return huntCells[randomCell];
   }
@@ -270,15 +278,9 @@ class targetGameboard {
     if (!targetCells.length) {
       return null;
     }
+    // Pick a random cell from the array
     const randomCell = Math.floor(Math.random() * targetCells.length);
     return targetCells[randomCell];
-  }
-  
-  checkCell(targetCell) {
-    // Get all surrounding cells
-    const surroundingCells = this.getSurrounding(targetCell.coords);
-    // Mark the cell as impossible if all surrounding cells have been attacked and there was no ship
-    targetCell.possible = !surroundingCells.every(cell => cell.attacked && !cell.ship);
   }
 }
 

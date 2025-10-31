@@ -82,3 +82,19 @@ test('Mark potential with existing.', () => {
   expect(CPU.targetBoard.grid[6][5].potential).toBe(false);
   expect(CPU.targetBoard.grid[5][4].potential).toBe(true);
 });
+
+
+test('Mark potential with 2 and get direction.', () => {
+  const CPU = new cpuPlayer;
+  const mockHit = {hit: true};
+  CPU.getAttackResults(mockHit, [5, 5]);
+  CPU.analyzeTarget();
+  CPU.getAttackResults(mockHit, [5, 6]);
+  CPU.analyzeTarget();
+  expect(CPU.targetBoard.grid[6][5].potential).toBe(false);
+  expect(CPU.targetBoard.grid[4][5].potential).toBe(false);
+  expect(CPU.targetBoard.grid[6][6].potential).toBe(false);
+  expect(CPU.targetBoard.grid[4][6].potential).toBe(false);
+  expect(CPU.targetBoard.grid[5][4].potential).toBe(true);
+  expect(CPU.targetBoard.grid[5][7].potential).toBe(true);
+});

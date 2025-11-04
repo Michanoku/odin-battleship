@@ -289,4 +289,33 @@ This module handles all event listeners for the DOM, as well as changes in the D
 
 ## Notes
 
+About the flow of the game:
+
+The game can be played against another human or against the CPU.
+
+When the game is played with 2 people, after every round the current player has to confirm the end of their round. This hides all gameboards and will show a confirmation for the next player to start their turn. This is used so the players can take turns on the same computer without seeing each other's ships.
+I also opted for a 'Fire' button to prevent accidental attacking when clicking a cell. The player can 
+confirm their target and commit with the button. 
+
+About the CPU player:
+
+The CPU player has two default modes of operation. Hunt mode or attack mode. When in hunt mode, the CPU player will randomly target one cell from an array. The possible cells use a pattern so the CPU doesn't waste any attempts on too many adjacent cells. When in target mode, the CPU is actively looking to hit
+an already found target. It is activated once the CPU hits a ship during hunt mode. The target mode
+will continue until all options of possible adjacent cells with ships have been exhausted. It will try
+to find adjacent ships if it finds that it has hit more than 5 targets. The CPU will  build their own targetboard based on their previous attacks, and will analyze it for possible locations before each attack attempt. It's completely separated from the players gameboard so it can't cheat in any way. 
+
 ## Thoughts
+
+Limitations in visible fidelity:
+
+During creation of the game I wanted to opt for more visually interesting ships. I tried my hand at
+some pixel art but realized quickly that it looked jarring in comparison to the rest of the game's
+layout. I gave up on having nicer ships in favor of a more simple approach with colored cells.
+If revisited, this could be improved on to have nicer visual feedback for ships and hits.
+
+Limitations of the CPU player:
+
+Currently, the CPU player will randomly attack cells in a pattern until it finds a ship, upon which 
+it will very effectively try to ascertain potential adjacent cells to attack. This works very well for one ship. Once two hits have been registered, the CPU will calculate the ships direction and will prioritize attacks along that axis. If there are 5 or less hits along this attacks.  TO DO
+
+Logging:

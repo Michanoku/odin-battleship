@@ -1,7 +1,7 @@
 import "./styles.css";
 
 import { Player } from './players.js';
-import { cpuPlayer } from './cpu.js';
+import { CPUPlayer } from './cpu.js';
 import { randomPlacement } from './gameboard.js';
 import { initializeGame, randomizeShips, turn, registerAttack } from './interface.js';
 
@@ -16,7 +16,7 @@ const state = {
 // Create a player and push it to the players array
 function addPlayer(data) {
   if (data.cpu) {
-    state.players.push(new cpuPlayer());
+    state.players.push(new CPUPlayer());
   } else {
     const name = data.name;
     const ships = data.ships;
@@ -110,7 +110,7 @@ function waitForEnd() {
     // Set turn to the next turn 
     state.turn = state.turn === 0 ? 1 : 0;
     // If the player is a cpu, take it's turn
-    if (state.players[state.turn].cpu) {
+    if (state.players[state.turn].constructor === CPUPlayer) {
       const cpu = state.players[state.turn];
       const humanPlayer = state.turn === 0 ? state.players[1] : state.players[0];
       // Let the cpu decide on an attack coordinate

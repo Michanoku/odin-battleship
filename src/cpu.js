@@ -1,14 +1,13 @@
 import { createGameboard } from './gameboard.js';
 
-class cpuPlayer {
+class CPUPlayer {
   constructor() {
     this.name = 'CPU';
-    this.cpu = true;
     this.targetMode = false;
     this.targetShip = {};
     this.gameboard = createGameboard();
     this.gameboard.randomizeBoard();
-    this.targetBoard = new targetGameboard;
+    this.targetBoard = new targetGameboard();
   }
 
   // Attacks a cell
@@ -299,4 +298,4 @@ class targetCell{
   }
 }
 
-export { cpuPlayer }
+export { CPUPlayer }

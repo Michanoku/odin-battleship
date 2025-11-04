@@ -14,7 +14,7 @@ class Gameboard {
     if (ships) {
       // If we just passed random, place random ships
       if (ships === 'random') {
-        this.randomizeBoard();
+        this.#randomizeBoard();
       } else {
         // Place each ship in it's location
         for (const ship in ships) {
@@ -100,7 +100,7 @@ class Gameboard {
   }
 
   // Randomize a board of ships
-  randomizeBoard() {
+  #randomizeBoard() {
     // Place all ships randomly on the map
     const ships = [5, 4, 3, 3, 2]
     for (const ship of ships) {

@@ -5,9 +5,8 @@ class CPUPlayer {
     this.name = 'CPU';
     this.targetMode = false;
     this.targetShip = {};
-    this.gameboard = createGameboard();
-    this.gameboard.randomizeBoard();
-    this.targetBoard = new targetGameboard();
+    this.gameboard = createGameboard('random');
+    this.targetBoard = new TargetGameboard();
   }
 
   // Attacks a cell
@@ -136,11 +135,11 @@ class CPUPlayer {
   }
 }
 
-class targetGameboard {
+class TargetGameboard {
   constructor() {
     // Create a 10x10 grid to play the game in
     this.grid = Array.from({ length: 10 }, (_, i) =>
-      Array.from({ length: 10 }, (_, j) => new targetCell([i, j]))
+      Array.from({ length: 10 }, (_, j) => new TargetCell([i, j]))
     );
   }
 
@@ -284,7 +283,7 @@ class targetGameboard {
 }
 
 // The class for the AI target cell
-class targetCell{
+class TargetCell{
   constructor(coords) {
     this.coords = coords;
     this.attacked = false;

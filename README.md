@@ -257,6 +257,36 @@ A special cell class for the targetboard. Saves the cpu players analysis and rec
 
 ### interface.js
 
+This module handles all event listeners for the DOM, as well as changes in the DOM, rerenders, and user inputs in the DOM. Handles user input data back to the gameflow module via event listeners. 
+
+**Key Functions:**
+
+-`initializeGame()`: Calls several other functions to initialize the DOM and create needed DOM objects.
+-`createStars()`: Creates a random starry background for both player gameboards.
+-`addListeners()`: Adds all event listeners needed for elements of the DOM.
+-`createSetupBoard()`: Creates the board the player uses to place their ships. 
+-`createShipSelection()`: Creates the ship selection the player uses to select, rotate and drag the ships.
+-`newGame()`: Allows the player to start a new game. It sets everything back to default. 
+-`resetBoard()`: Resets the players placed ships to allow them to start over. 
+-`callRandomizer()`: Sends an event to be picked up by gameflow to use existing methods to randomize ship locations on the board.
+-`confirmPlayer()`: Used when a player has finished and confirmed their setup. Saves either the human players setup to the state.players array or marks the player as CPU. Once both players have been added, dispatches an event for gameflow to save the players in the game state and start the game.
+-`selectShip()`: Used when a player clicks on a ship in the selection. The ship will be marked and the name displayed.
+-`rotateShip()`: Used when the player double clicks on a ship in the selection. The ship will rotate to horizontal or vertical.
+-`dragShip()`: Used when the player drags a ship in the selection. The data will be saved to the dragData object and createGhost will be called to create a ghost image to visualize the drag. 
+-`createGhost()`: Creates a ghost of the size and direction of the current ship. The ghost can be used to replace the default drag image.
+-`dropShip()`: Used when the player drops a ship into a location on the setup board. If the location is occupied or there is not enough space in the players chosen location, the drop will be rejected. Otherwise the ship will be placed and the select ship removed from the selection. 
+-`randomizeShips()`: Will place all ships that were returned by the gameflow after requesting a manual placement. 
+-`turn()`: Depending on whether it's the first turn, or the start or end of a turn, different DOM objects need to be visible and different announcements have to be made. This function handles the correct visuals and announcements.
+-`registerAttack()`: When an attack has happened and the results returned, an understandable announcement is created and the specific gameboard re-rendered. This function also checks whether the game is over or not and will end it if so.
+-`createGameboard()`: Creates the visible gameboard out of the gameboard data. Depending on whether the gameboard belongs to the current player or the 'enemy', different things will be displayed. (After all, we don't want to see the other player's ships if we have not found them yet)
+-`clickCell()`: Used when the player clicks on a cell in their turn. Will update the current target coordinates if the cell is valid and show visual confirmation of the cell that is about to be attacked. If the cell is valid, the fire button is released.
+
+**Key Variables:**
+
+-`dragData`: When the player starts dragging a ship, details about the ship are saved to drag data, namely the ship type, the direction the ship was rotated to and the size. This data is used to drop the correct ship.
+-`setupData`: Used to collect the player names and their ship placements to eventually hand over to the gameflow object once the players have finished their setup. 
+-`state`: Keeps track of the current clicked cell coordinates (as attackTarget), whether the turn is currently in the end phase and whether the game has finished initializing once (to prevent double event listeners)
+
 ## Notes
 
 ## Thoughts

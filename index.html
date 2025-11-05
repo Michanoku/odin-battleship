@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battleship</title>
+<script defer src="main.js"></script></head>
+<body>
+  <!-- Nav item showing title and game options -->
+  <nav>
+    <div>Battleship Space</div>
+    <div id="option-buttons">
+      <button id="new-game">New Game</button>
+      <button id="alt-colors">Alt Colors</button>
+    </div>
+  </nav>
+  <!-- Info panel showing current player (or name) -->
+  <div id="info">
+    <div id="current-player">Player 1</div>
+  </div>
+  <!-- Action panel showing currently needed buttons -->
+  <div id="action">
+    <button class="game-button" id="reset-button">Reset</button>
+    <button class="game-button" id="random-button">Random</button>
+    <button class="game-button" id="confirm-button" disabled="true">Confirm</button>
+    <button class="game-button" id="human-button">Human</button>
+    <button class="game-button" id="cpu-button">CPU</button>
+    <button id="fire-button" disabled="true">Fire</button>
+    <button class="game-button" id="end-button">End Turn</button>
+    <button class="game-button" id="start-button">Start Turn</button>
+  </div>
+  <!-- Fields for player gameboards -->
+  <div id="player1"></div>
+  <div id="player2"></div>
+  <!-- Setup area for players to enter their name and pick their ships -->
+  <div id="setup">
+    <div id="name">
+      <div>Name:</div>
+      <input type="text" id="enter-name" minlength="1" maxlength="20">
+    </div>
+    <div id="ship-selection"></div>
+    <div id="ship-name"></div>
+  </div>
+  <!-- Announce area guiding the players and showing attack logs -->
+  <div id="announce">Click to select a ship. Double click to rotate. Drag to place.</div>
+</body>
+</html>

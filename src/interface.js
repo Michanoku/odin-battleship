@@ -465,6 +465,8 @@ function rotateShip(clicked) {
 // Custom drag event
 // https://stackoverflow.com/questions/29131466/change-ghost-image-in-html5-drag-and-drop
 function dragShip(event, cell) {
+  // First select the ship we are draggin.
+  selectShip(cell);
   // The sizes of the ships
   const shipMap = {
     'Patrol': 2,

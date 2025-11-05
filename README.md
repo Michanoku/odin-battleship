@@ -8,13 +8,9 @@ This is my attempt at creating Battleship for The Odin Project.
 Pretty early on in the project I figured that I would like to give it a space theme instead of the
 classic sea theme. This also inspired the color palettes and backgrounds. 
 
-This game can be played with two players or against a CPU. Each player places five ships, a Patrol of size 2, a Cruiser of size 3, a Destroyer of size 3, an Interceptor of size 4 and a Leviathan of size 5.
+This game can be played with two players or against a CPU. Each player places five ships, a Patrol of size 2, a Cruiser of size 3, a Destroyer of size 3, an Interceptor of size 4 and a Leviathan of size 5. Players can rotate the ships and drag them into their desired locations.
 
-Players take turns to try and find each others ships. Missed and hit cells are recorded and shown on the players boards. Once a player has destroyed all enemy ships, they win. 
-
-At first I stuck with the TDD approach, making the tests first and then creating all the necessary classes and functions. Basically, I coded along with the instructions at first. But later, once I started getting into the interface and the CPU player and so on, I found it easier to write a function and then write the test for it. I may need some more practice with TDD, but it did not fit my flow well at a later point in this exercise. 
-
-However, I also recognize that I had the most problems after starting to implement the interface, as the DOM was somewhat hard to test with when not relying on only JavaScript anymore. So there may also be some more to learn there. 
+Once the setup is complete, players take turns to try and find each others ships. Missed and hit cells are recorded and shown on the players boards. Once a player has destroyed all enemy ships, they win. 
 
 ## Modules
 
@@ -26,7 +22,7 @@ This module handles everything to do with ships.
 
 ##### Ship
 
-This is a very simple class representing a players ship on the board. Ships do not save any information of who they belong to or where they are placed. This is handled by the gameboard instead.
+This is a very simple class representing a players ship on the board. Ships do not save any information of who they belong to or where they are placed. This is handled by the game board instead.
 
 **Constructor:**
 
@@ -47,13 +43,13 @@ constructor(length) {
 
 ### gameboard.js
 
-This module handles the creation of the gameboard and everything that happens to and on the gameboard.
+This module handles the creation of the game board and everything that happens to and on the game board.
 
 #### Classes
 
 ##### Gameboard
 
-The class that handles the gameboard. It can place ships, manually or automatically, and keep track of where they are. It also keeps track of how many ships there are and how many have been sunk, effectively checking the status of the game. When a player makes an attack, the gameboard receives the coordinates and handles the attack and the results.
+The class that handles the game board. It can place ships, manually or automatically, and keep track of where they are. It also keeps track of how many ships there are and how many have been sunk, effectively checking the status of the game. When a player makes an attack, the game board receives the coordinates and handles the attack and the results.
 
 **Constructor:**
 
@@ -86,13 +82,13 @@ constructor(ships = null) {
 
 **Key Methods:**
 
-- `placeShip()`: Places a ship on the gameboard. Returns the ship  if placed or null if the ship could not be placed.
-- `simulateRandomPlacement()`: Simulates a mock gameboard to return possible placements to render in the interface before the user decides their board.
-- `receiveAttack()`: Receives an attack on the gameboard. Marks the cell as attacked and returns feedback on hit or miss, or if all ships are sunk.
+- `placeShip()`: Places a ship on the game board. Returns the ship  if placed or null if the ship could not be placed.
+- `simulateRandomPlacement()`: Simulates a mock game board to return possible placements to render in the interface before the user decides their board.
+- `receiveAttack()`: Receives an attack on the game board. Marks the cell as attacked and returns feedback on hit or miss, or if all ships are sunk.
 
 ##### Cell
 
-This class handles the information for each cell on the gameboard. Cells save their coordinates as well as their status, if they have been previously targeted. They also keep a reference to any ships possibly on them. In addition, to make placement easier, cells will keep an integer of the space below and to the right of themselves up to 4 cells. 
+This class handles the information for each cell on the game board. Cells save their coordinates as well as their status, if they have been previously targeted. They also keep a reference to any ships possibly on them. In addition, to make placement easier, cells will keep an integer of the space below and to the right of themselves up to 4 cells. 
 
 Cells also report back on available space if a ship was to be placed on them. 
 
@@ -123,8 +119,8 @@ constructor(coords) {
 
 #### Module Functions
 
-- `createGameboard()`: Creates and returns a new gameboard with optional placed ships.
-- `randomPlacement()`: Creates a mock gameboard and simulates random placement of ships to return to the interface for the user to consider.
+- `createGameboard()`: Creates and returns a new game board with optional placed ships.
+- `randomPlacement()`: Creates a mock game board and simulates random placement of ships to return to the interface for the user to consider.
 
 ### players.js
 
@@ -134,7 +130,7 @@ The module that handles human players.
 
 ##### Player
 
-The player class is a simple class that saves the players name and their gameboard. It only serves to associate these two things. 
+The player class is a simple class that saves the players name and their game board. It only serves to associate these two things. 
 
 **Constructor:**
 
@@ -147,7 +143,7 @@ constructor(name, ships) {
  
 **Properties:**
 
-- `gameboard`: A reference to the gameboard created by the gameboard module and associated with the player.
+- `gameboard`: A reference to the game board created by the game board module and associated with the player.
 - `name`: The players name.
 
 ### gameflow.js
@@ -157,15 +153,15 @@ coming from player input.
 
 **Key Functions:**
 
-- `addPlayer()`: Adds a human or cpu player to the players array. 
+- `addPlayer()`: Adds a human or CPU player to the players array. 
 - `start()`: Starts the game setup by adding event listeners and instructing the interface module to initialize the game.
 - `takeTurns()`: Starts the turn phase by adding event listeners waiting for players to start or end their turn, or attack the other player. Also instructs the interface module to start the first turn. 
 - `waitForPlayers()`: Adds an event listener to wait for player data to be received from the interface module. It will call addPlayer() for each received player and then call takeTurns() to start the turn phase.
 - `waitForReset()`: Adds an event listener to wait for the player to start a new game. Resets the game state and calls the interface module to initialize the game again.
-- `waitForRandomPlacement()`: Adds an event listener to wait for the player to randomize ship placement on the setup board. Calls the gameboard module to get random placement for ships and instructs the interface module to place them.
+- `waitForRandomPlacement()`: Adds an event listener to wait for the player to randomize ship placement on the setup board. Calls the game board module to get random placement for ships and instructs the interface module to place them.
 - `waitforStart()`: Adds an event listener to wait for a player to start their turn. Instructs the interface to start the turn while handing the current state of the game.
-- `waitForAttack()`: Adds an event listener to wait for a player to attack the other player. Will receive coordinates in the detail of the event and uses the receiving players gameboard to handle the attack. Instructs the interface module to handle the results of the attack visually.
-- `waitForEnd()`: Adds an event listener to wait for a player to end their turn. Changes to the next turn. If the next player is a CPU, it instructs the CPU to pick a cell to attack, then instructs the human players gameboard to handle the attack. It then passes the result back to the CPU so the CPU can calculate their next possible moves, and instructs the interface module to handle the results of the attack visually.
+- `waitForAttack()`: Adds an event listener to wait for a player to attack the other player. Will receive coordinates in the detail of the event and uses the receiving players game board to handle the attack. Instructs the interface module to handle the results of the attack visually.
+- `waitForEnd()`: Adds an event listener to wait for a player to end their turn. Changes to the next turn. If the next player is a CPU, it instructs the CPU to pick a cell to attack, then instructs the human players game board to handle the attack. It then passes the result back to the CPU so the CPU can calculate their next possible moves, and instructs the interface module to handle the results of the attack visually.
 
 **Key Variables:**
 
@@ -173,13 +169,13 @@ coming from player input.
 
 ### cpu.js
 
-The module that handles cpu players. Contains special a special gameboard with special cells in addition to the CPUPlayer class.
+The module that handles CPU players. Contains special a special game board with special cells in addition to the CPUPlayer class.
 
 #### Classes
 
 ##### CPUPlayer
 
-This is the class that handles cpu actions. It defaults to the name 'CPU' and has a gameboard just like a human player, but the gameboard is random. It also has additional attributes. A special gameboard it uses to look for and attack the human players ships, a targetMode that gets activated once a ship has been found as well as the gathered information about the ship it is currently targeting. 
+This is the class that handles CPU actions. It defaults to the name 'CPU' and has a game board just like a human player, but the game board is random. It also has additional attributes. A special game board it uses to look for and attack the human players ships, a target mode that gets activated once a ship has been found as well as the gathered information about the ship it is currently targeting. 
 
 **Constructor:**
 
@@ -197,14 +193,14 @@ constructor() {
 
 - `name`: The CPU players name. Defaults to CPU.
 - `targetMode`: A boolean. Defaults to false.
-- `targetShip`: The object representing the current targetMode targetShip. Empty at first.
-- `gameboard`: A reference to the gameboard created by the gameboard module and associated with the cpu player.
-- `targetBoard`: A special gameboard used by the CPU to track their own actions. 
+- `targetShip`: The object representing the current target mode target ship. Empty at first.
+- `gameboard`: A reference to the game board created by the game board module and associated with the CPU player.
+- `targetBoard`: A special game board used by the CPU to track their own actions. 
 
 **Key Methods:**
 
-- `attackCell()`: Will return the next coordinate the CPU player is going to attack. If the CPU player is in target mode, analyzeTarget is called to mark potential targets. Then, targetBoard.getTargetCell is called to ask the targetBoard to provide a cell to attack. If no cell is returned, targetMode is ended and the function is called again. If the CPU player is not in target mode, targetBoard.getHuntCell is called to ask the targetBoard to provide a cell to attack. The function returns a cell to attack.
-- `analyzeTarget()`: This function will adjust targetShip attribute values according to the current data. If there are more than 2 hits recorded in the current target, and the likely direction of the ship has not been estimated, the function will estimate horizontal or vertical. Then, the coordinates will be sorted. No matter how many hits there are, the internal #markPotential function is called to mark potential cells to hit. 
+- `attackCell()`: Will return the next coordinate the CPU player is going to attack. If the CPU player is in target mode, analyzeTarget is called to mark potential targets. Then, targetBoard.getTargetCell is called to ask the targetBoard to provide a cell to attack. If no cell is returned, target mode is ended and the function is called again. If the CPU player is not in target mode, targetBoard.getHuntCell is called to ask the targetBoard to provide a cell to attack. The function returns a cell to attack.
+- `analyzeTarget()`: This function will adjust the target ship attribute values according to the current data. If there are more than 2 hits recorded in the current target, and the likely direction of the ship has not been estimated, the function will estimate horizontal or vertical. Then, the coordinates will be sorted. No matter how many hits there are, the internal #markPotential function is called to mark potential cells to hit. 
 - `getAttackResults()`: This function is called after an attack has happened, so the CPU player can understand the results. First, targetBoard.markAttack is called to record the attack. If a hit was reported, the CPU player will either enter target mode or add the coordinates to the current target (if already in target mode). If the current target has been reported as branched (if we have recorded more hits than the allowed length of the longest ship), then these coordinates will show us where the targets branch, so the point is calculated. After that, the targetBoard.updateMap method is called to analyze the map for new, impossible locations. 
 
 ##### TargetGameboard
@@ -240,7 +236,7 @@ constructor() {
 
 ##### TargetCell
 
-A special cell class for the targetboard. Saves the cpu players analysis and records attacks and hits.
+A special cell class for the target board. Saves the CPU players analysis and records attacks and hits.
 
 **Constructor:**
 
@@ -268,12 +264,12 @@ A special cell class for the targetboard. Saves the cpu players analysis and rec
 
 ### interface.js
 
-This module handles all event listeners for the DOM, as well as changes in the DOM, rerenders, and user inputs in the DOM. Handles user input data back to the gameflow module via event listeners. 
+This module handles all event listeners for the DOM, as well as changes in the DOM, re-renders, and user inputs in the DOM. Handles user input data back to the gameflow module via event listeners. 
 
 **Key Functions:**
 
 - `initializeGame()`: Calls several other functions to initialize the DOM and create needed DOM objects.
-- `createStars()`: Creates a random starry background for both player gameboards.
+- `createStars()`: Creates a random starry background for both player game boards.
 - `addListeners()`: Adds all event listeners needed for elements of the DOM.
 - `createSetupBoard()`: Creates the board the player uses to place their ships. 
 - `createShipSelection()`: Creates the ship selection the player uses to select, rotate and drag the ships.
@@ -288,8 +284,8 @@ This module handles all event listeners for the DOM, as well as changes in the D
 - `dropShip()`: Used when the player drops a ship into a location on the setup board. If the location is occupied or there is not enough space in the players chosen location, the drop will be rejected. Otherwise the ship will be placed and the select ship removed from the selection. 
 - `randomizeShips()`: Will place all ships that were returned by the gameflow after requesting a manual placement. 
 - `turn()`: Depending on whether it's the first turn, or the start or end of a turn, different DOM objects need to be visible and different announcements have to be made. This function handles the correct visuals and announcements.
-- `registerAttack()`: When an attack has happened and the results returned, an understandable announcement is created and the specific gameboard re-rendered. This function also checks whether the game is over or not and will end it if so.
-- `createGameboard()`: Creates the visible gameboard out of the gameboard data. Depending on whether the gameboard belongs to the current player or the 'enemy', different things will be displayed. (After all, we don't want to see the other player's ships if we have not found them yet)
+- `registerAttack()`: When an attack has happened and the results returned, an understandable announcement is created and the specific game board re-rendered. This function also checks whether the game is over or not and will end it if so.
+- `createGameboard()`: Creates the visible game board out of the game board data. Depending on whether the game board belongs to the current player or the 'enemy', different things will be displayed. (After all, we don't want to see the other player's ships if we have not found them yet)
 - `clickCell()`: Used when the player clicks on a cell in their turn. Will update the current target coordinates if the cell is valid and show visual confirmation of the cell that is about to be attacked. If the cell is valid, the fire button is released.
 
 **Key Variables:**
@@ -302,7 +298,7 @@ This module handles all event listeners for the DOM, as well as changes in the D
 
 About the flow of the game:
 
-The game can be played against another human or against the CPU. When the game is played with 2 people, after every round the current player has to confirm the end of their round. This hides all gameboards and will show a confirmation for the next player to start their turn. This is used so the players can take turns on the same computer without seeing each other's ships.
+The game can be played against another human or against the CPU. When the game is played with 2 people, after every round the current player has to confirm the end of their round. This hides all game boards and will show a confirmation for the next player to start their turn. This is used so the players can take turns on the same computer without seeing each other's ships.
 I also opted for a 'Fire' button to prevent accidental attacking when clicking a cell. The player can 
 confirm their target and commit with the button. 
 
@@ -311,7 +307,7 @@ About the CPU player:
 The CPU player has two default modes of operation. Hunt mode or attack mode. When in hunt mode, the CPU player will randomly target one cell from an array. The possible cells use a pattern so the CPU doesn't waste any attempts on too many adjacent cells. When in target mode, the CPU is actively looking to hit
 an already found target. It is activated once the CPU hits a ship during hunt mode. The target mode
 will continue until all options of possible adjacent cells with ships have been exhausted. It will try
-to find adjacent ships if it finds that it has hit more than 5 targets. The CPU will  build their own targetboard based on their previous attacks, and will analyze it for possible locations before each attack attempt. It's completely separated from the players gameboard so it can't cheat in any way. 
+to find adjacent ships if it finds that it has hit more than 5 targets. The CPU will  build their own target board based on their previous attacks, and will analyze it for possible locations before each attack attempt. It's completely separated from the players game board so it can't cheat in any way. 
 
 ## Thoughts
 
@@ -325,7 +321,7 @@ If revisited, this could be improved on to have nicer visual feedback for ships 
 Limitations of the CPU player:
 
 Currently, the CPU player will randomly attack cells in a pattern until it finds a ship, upon which 
-it will try to ascertain potential adjacent cells to attack. This works very well for single ships. The CPU will destroy them and then go back to hunt mode. It can find adjacent ships of a different direction ONLY if the connected ships cover more than 5 cells in the initial direction the CPU was targetting. If a player were to line up a 2 length ship and then a 3 length ship connected at the end in a different direction, the CPU will stop looking once it has hit all 3 targets that are in the suspected direction. Eventually, through hunt mode the CPU will find the rest, but it will not be efficient. A better algorithm for marking potential targets could possibly make it more efficient.
+it will try to ascertain potential adjacent cells to attack. This works very well for single ships. The CPU will destroy them and then go back to hunt mode. It can find adjacent ships of a different direction ONLY if the connected ships cover more than 5 cells in the initial direction the CPU was targeting. If a player were to line up a 2 length ship and then a 3 length ship connected at the end in a different direction, the CPU will stop looking once it has hit all 3 targets that are in the suspected direction. Eventually, through hunt mode the CPU will find the rest, but it will not be efficient. A better algorithm for marking potential targets could possibly make it more efficient.
 Also, the CPU currently does not keep track of which size ships it has destroyed. This is partially linked to the fact that, if the player lines up the ships like in the previous example, the CPU might mistake adjacent ships for ships of different sizes. A better algorithm could possible keep track of suspected ship sizes found. Also, instead of randomly going over a pattern in hunt mode, the CPU could try to flush out big ships first by adjusting the spread. 
 
 I found that for this project, making a really difficult CPU may be beyond the scope of what I am aiming for, but it could be fun for future adjustments of this project.
@@ -337,3 +333,11 @@ making a list of all those logs, so that the player can see what happened over t
 against it, as it was not a requirement and may just end up making me take too long to finish.
 If added, a bootstrap inspired off canvas could be used to show all log messages when clicking
 on the log, for example.
+
+Approach: 
+
+At first I stuck with the TDD approach, making the tests first and then creating all the necessary classes and functions. Basically, I coded along with the instructions at first. But later, once I started getting into the interface and the CPU player and so on, I found it easier to write a function and then write the test for it. I may need some more practice with TDD, but it did not fit my flow well at a later point in this exercise. 
+
+However, I also recognize that I had the most problems after starting to implement the interface, as the DOM was somewhat hard to test with when not relying on only JavaScript anymore. So there may also be some more to learn there. 
+
+I think I have improved somewhat in my usage of git, but I still feel I am avoiding the more involved functions, instead of relying on them.

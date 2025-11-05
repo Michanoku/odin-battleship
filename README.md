@@ -12,6 +12,10 @@ This game can be played with two players or against a CPU. Each player places fi
 
 Once the setup is complete, players take turns to try and find each others ships. Missed and hit cells are recorded and shown on the players boards. Once a player has destroyed all enemy ships, they win. 
 
+## Font
+
+Silkscreen Bold by Jason Kottke. https://kottke.org/plus/type/silkscreen/index.html
+
 ## Modules
 
 ### ships.js

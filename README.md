@@ -3,7 +3,18 @@ The Odin Project Battleship
 
 ## Overview
 
-WRITE OVERVIEW HERE
+This is my attempt at creating Battleship for The Odin Project.
+
+Pretty early on in the project I figured that I would like to give it a space theme instead of the
+classic sea theme. This also inspired the color palettes and backgrounds. 
+
+This game can be played with two players or against a CPU. Each player places five ships, a Patrol of size 2, a Cruiser of size 3, a Destroyer of size 3, an Interceptor of size 4 and a Leviathan of size 5.
+
+Players take turns to try and find each others ships. Missed and hit cells are recorded and shown on the players boards. Once a player has destroyed all enemy ships, they win. 
+
+At first I stuck with the TDD approach, making the tests first and then creating all the necessary classes and functions. Basically, I coded along with the instructions at first. But later, once I started getting into the interface and the CPU player and so on, I found it easier to write a function and then write the test for it. I may need some more practice with TDD, but it did not fit my flow well at a later point in this exercise. 
+
+However, I also recognize that I had the most problems after starting to implement the interface, as the DOM was somewhat hard to test with when not relying on only JavaScript anymore. So there may also be some more to learn there. 
 
 ## Modules
 
@@ -136,7 +147,7 @@ constructor(name, ships) {
  
 **Properties:**
 
--`gameboard`: A reference to the gameboard created by the gameboard module and associated with the player.
+- `gameboard`: A reference to the gameboard created by the gameboard module and associated with the player.
 - `name`: The players name.
 
 ### gameflow.js
@@ -221,9 +232,9 @@ constructor() {
 - `addPotential()`: The opposite of removePotential, sets potential to true for cells surrounding the given coordinates that are likely targets.
 - `checkEdgePotential()`: If a ship was too big (6 or more) but all cells along the ships direction have been exhausted, edge cells in the other direction are checked. (around the first and last cell in a hit array) If any cells exist that are yet to be attacked, they will have their potential set to true.
 - `markSingle()`: After the first hit of a target, all surrounding possible cells are marked as potential targets.
--`markAttack()`: Once a cell has been attacked, it will be marked as attacked. If a hit was reported, ship will be set to true, and potential to false (as there is no longer a need to attack the cell).
--`getHuntCell()`: Creates an array of all possible cells to hunt in a pattern (so the CPU doesn't keep trying adjacent cells). Returns a random cell from that array.
--`getTargetCell()`: Creates an array of all cells that are set to potential = true. Returns null if there are none, or a random cell from the array.
+- `markAttack()`: Once a cell has been attacked, it will be marked as attacked. If a hit was reported, ship will be set to true, and potential to false (as there is no longer a need to attack the cell).
+- `getHuntCell()`: Creates an array of all possible cells to hunt in a pattern (so the CPU doesn't keep trying adjacent cells). Returns a random cell from that array.
+- `getTargetCell()`: Creates an array of all cells that are set to potential = true. Returns null if there are none, or a random cell from the array.
 
 #### Classes
 
@@ -253,7 +264,7 @@ A special cell class for the targetboard. Saves the cpu players analysis and rec
 
 **Key Methods:**
 
--`noHunt()`: If the cell has been attacked or is marked possible = false, do not select it when hunting. Returns true if it should be skipped.
+- `noHunt()`: If the cell has been attacked or is marked possible = false, do not select it when hunting. Returns true if it should be skipped.
 
 ### interface.js
 
@@ -261,39 +272,37 @@ This module handles all event listeners for the DOM, as well as changes in the D
 
 **Key Functions:**
 
--`initializeGame()`: Calls several other functions to initialize the DOM and create needed DOM objects.
--`createStars()`: Creates a random starry background for both player gameboards.
--`addListeners()`: Adds all event listeners needed for elements of the DOM.
--`createSetupBoard()`: Creates the board the player uses to place their ships. 
--`createShipSelection()`: Creates the ship selection the player uses to select, rotate and drag the ships.
--`newGame()`: Allows the player to start a new game. It sets everything back to default. 
--`resetBoard()`: Resets the players placed ships to allow them to start over. 
--`callRandomizer()`: Sends an event to be picked up by gameflow to use existing methods to randomize ship locations on the board.
--`confirmPlayer()`: Used when a player has finished and confirmed their setup. Saves either the human players setup to the state.players array or marks the player as CPU. Once both players have been added, dispatches an event for gameflow to save the players in the game state and start the game.
--`selectShip()`: Used when a player clicks on a ship in the selection. The ship will be marked and the name displayed.
--`rotateShip()`: Used when the player double clicks on a ship in the selection. The ship will rotate to horizontal or vertical.
--`dragShip()`: Used when the player drags a ship in the selection. The data will be saved to the dragData object and createGhost will be called to create a ghost image to visualize the drag. 
--`createGhost()`: Creates a ghost of the size and direction of the current ship. The ghost can be used to replace the default drag image.
--`dropShip()`: Used when the player drops a ship into a location on the setup board. If the location is occupied or there is not enough space in the players chosen location, the drop will be rejected. Otherwise the ship will be placed and the select ship removed from the selection. 
--`randomizeShips()`: Will place all ships that were returned by the gameflow after requesting a manual placement. 
--`turn()`: Depending on whether it's the first turn, or the start or end of a turn, different DOM objects need to be visible and different announcements have to be made. This function handles the correct visuals and announcements.
--`registerAttack()`: When an attack has happened and the results returned, an understandable announcement is created and the specific gameboard re-rendered. This function also checks whether the game is over or not and will end it if so.
--`createGameboard()`: Creates the visible gameboard out of the gameboard data. Depending on whether the gameboard belongs to the current player or the 'enemy', different things will be displayed. (After all, we don't want to see the other player's ships if we have not found them yet)
--`clickCell()`: Used when the player clicks on a cell in their turn. Will update the current target coordinates if the cell is valid and show visual confirmation of the cell that is about to be attacked. If the cell is valid, the fire button is released.
+- `initializeGame()`: Calls several other functions to initialize the DOM and create needed DOM objects.
+- `createStars()`: Creates a random starry background for both player gameboards.
+- `addListeners()`: Adds all event listeners needed for elements of the DOM.
+- `createSetupBoard()`: Creates the board the player uses to place their ships. 
+- `createShipSelection()`: Creates the ship selection the player uses to select, rotate and drag the ships.
+- `newGame()`: Allows the player to start a new game. It sets everything back to default. 
+- `resetBoard()`: Resets the players placed ships to allow them to start over. 
+- `callRandomizer()`: Sends an event to be picked up by gameflow to use existing methods to randomize ship locations on the board.
+- `confirmPlayer()`: Used when a player has finished and confirmed their setup. Saves either the human players setup to the state.players array or marks the player as CPU. Once both players have been added, dispatches an event for gameflow to save the players in the game state and start the game.
+- `selectShip()`: Used when a player clicks on a ship in the selection. The ship will be marked and the name displayed.
+- `rotateShip()`: Used when the player double clicks on a ship in the selection. The ship will rotate to horizontal or vertical.
+- `dragShip()`: Used when the player drags a ship in the selection. The data will be saved to the dragData object and createGhost will be called to create a ghost image to visualize the drag. 
+- `createGhost()`: Creates a ghost of the size and direction of the current ship. The ghost can be used to replace the default drag image.
+- `dropShip()`: Used when the player drops a ship into a location on the setup board. If the location is occupied or there is not enough space in the players chosen location, the drop will be rejected. Otherwise the ship will be placed and the select ship removed from the selection. 
+- `randomizeShips()`: Will place all ships that were returned by the gameflow after requesting a manual placement. 
+- `turn()`: Depending on whether it's the first turn, or the start or end of a turn, different DOM objects need to be visible and different announcements have to be made. This function handles the correct visuals and announcements.
+- `registerAttack()`: When an attack has happened and the results returned, an understandable announcement is created and the specific gameboard re-rendered. This function also checks whether the game is over or not and will end it if so.
+- `createGameboard()`: Creates the visible gameboard out of the gameboard data. Depending on whether the gameboard belongs to the current player or the 'enemy', different things will be displayed. (After all, we don't want to see the other player's ships if we have not found them yet)
+- `clickCell()`: Used when the player clicks on a cell in their turn. Will update the current target coordinates if the cell is valid and show visual confirmation of the cell that is about to be attacked. If the cell is valid, the fire button is released.
 
 **Key Variables:**
 
--`dragData`: When the player starts dragging a ship, details about the ship are saved to drag data, namely the ship type, the direction the ship was rotated to and the size. This data is used to drop the correct ship.
--`setupData`: Used to collect the player names and their ship placements to eventually hand over to the gameflow object once the players have finished their setup. 
--`state`: Keeps track of the current clicked cell coordinates (as attackTarget), whether the turn is currently in the end phase and whether the game has finished initializing once (to prevent double event listeners)
+- `dragData`: When the player starts dragging a ship, details about the ship are saved to drag data, namely the ship type, the direction the ship was rotated to and the size. This data is used to drop the correct ship.
+- `setupData`: Used to collect the player names and their ship placements to eventually hand over to the gameflow object once the players have finished their setup. 
+- `state`: Keeps track of the current clicked cell coordinates (as attackTarget), whether the turn is currently in the end phase and whether the game has finished initializing once (to prevent double event listeners)
 
 ## Notes
 
 About the flow of the game:
 
-The game can be played against another human or against the CPU.
-
-When the game is played with 2 people, after every round the current player has to confirm the end of their round. This hides all gameboards and will show a confirmation for the next player to start their turn. This is used so the players can take turns on the same computer without seeing each other's ships.
+The game can be played against another human or against the CPU. When the game is played with 2 people, after every round the current player has to confirm the end of their round. This hides all gameboards and will show a confirmation for the next player to start their turn. This is used so the players can take turns on the same computer without seeing each other's ships.
 I also opted for a 'Fire' button to prevent accidental attacking when clicking a cell. The player can 
 confirm their target and commit with the button. 
 
@@ -316,6 +325,15 @@ If revisited, this could be improved on to have nicer visual feedback for ships 
 Limitations of the CPU player:
 
 Currently, the CPU player will randomly attack cells in a pattern until it finds a ship, upon which 
-it will very effectively try to ascertain potential adjacent cells to attack. This works very well for one ship. Once two hits have been registered, the CPU will calculate the ships direction and will prioritize attacks along that axis. If there are 5 or less hits along this attacks.  TO DO
+it will try to ascertain potential adjacent cells to attack. This works very well for single ships. The CPU will destroy them and then go back to hunt mode. It can find adjacent ships of a different direction ONLY if the connected ships cover more than 5 cells in the initial direction the CPU was targetting. If a player were to line up a 2 length ship and then a 3 length ship connected at the end in a different direction, the CPU will stop looking once it has hit all 3 targets that are in the suspected direction. Eventually, through hunt mode the CPU will find the rest, but it will not be efficient. A better algorithm for marking potential targets could possibly make it more efficient.
+Also, the CPU currently does not keep track of which size ships it has destroyed. This is partially linked to the fact that, if the player lines up the ships like in the previous example, the CPU might mistake adjacent ships for ships of different sizes. A better algorithm could possible keep track of suspected ship sizes found. Also, instead of randomly going over a pattern in hunt mode, the CPU could try to flush out big ships first by adjusting the spread. 
+
+I found that for this project, making a really difficult CPU may be beyond the scope of what I am aiming for, but it could be fun for future adjustments of this project.
 
 Logging:
+
+Currently, after every action, a log message will show the player what happened. I was considering
+making a list of all those logs, so that the player can see what happened over time, but I decided
+against it, as it was not a requirement and may just end up making me take too long to finish.
+If added, a bootstrap inspired off canvas could be used to show all log messages when clicking
+on the log, for example.
